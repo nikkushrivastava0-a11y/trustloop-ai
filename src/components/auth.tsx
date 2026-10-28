@@ -47,9 +47,9 @@ export function Auth({ mode }: { mode: "login" | "signup" }) {
             setBusy(true);
             setError("");
             try {
-              await api.authenticate(mode, { name, email, password, role });
+              const account = await api.authenticate(mode, { name, email, password, role });
               await refresh();
-              router.push(role === "student" ? "/student" : "/owner");
+              router.push(account.role === "owner" ? "/owner" : "/student");
             } catch (e) {
               setError((e as Error).message);
             } finally {
