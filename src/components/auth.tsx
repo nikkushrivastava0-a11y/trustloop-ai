@@ -41,15 +41,24 @@ export function Auth({ mode }: { mode: "login" | "signup" }) {
       </section>
       <section className="auth-form-wrap">
         <form
+          aria-busy={busy}
           className="auth-form"
           onSubmit={async (e) => {
             e.preventDefault();
+            if (busy) return;
             setBusy(true);
             setError("");
             try {
-              await api.authenticate(mode, { name, email, password, role });
+              const authenticated = await api.authenticate(mode, {
+                name,
+                email,
+                password,
+                role,
+              });
               await refresh();
-              router.push(role === "student" ? "/student" : "/owner");
+              router.push(
+                authenticated.role === "student" ? "/student" : "/owner",
+              );
             } catch (e) {
               setError((e as Error).message);
             } finally {

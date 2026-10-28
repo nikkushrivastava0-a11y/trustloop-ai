@@ -83,6 +83,34 @@ async function login(page, role) {
         path: `${process.env.SCREENSHOT_DIR}/mobile.png`,
         fullPage: true,
       });
+    await page.getByRole("status").filter({ hasText: "Demo mode" }).waitFor();
+    for (const route of ["/", "/login", "/signup", "/missing-page"]) {
+      await page.goto(`${origin}${route}`);
+      assert.equal(
+        await page.evaluate(
+          () => document.documentElement.scrollWidth > innerWidth,
+        ),
+        false,
+        `${route} fits mobile viewport`,
+      );
+    }
+    await page
+      .getByRole("heading", { name: "This page has moved out of reach." })
+      .waitFor();
+    await page.goto(`${origin}/student`);
+    await page.evaluate(() =>
+      localStorage.setItem("trustloop.demo.v1", "invalid-json"),
+    );
+    await page.goto(`${origin}/owner`);
+    await page.getByRole("button", { name: "Retry connection" }).waitFor();
+    assert.equal(
+      await page.getByRole("heading", { name: "Step into the loop." }).count(),
+      0,
+      "Session failure is not presented as signed out",
+    );
+    await page.evaluate(() => localStorage.removeItem("trustloop.demo.v1"));
+    await page.getByRole("button", { name: "Retry connection" }).click();
+    await page.getByRole("heading", { name: "Step into the loop." }).waitFor();
     await page.setViewportSize({ width: 1440, height: 1000 });
     console.log(
       "PASS discovery search, filters, empty state and mobile layout",

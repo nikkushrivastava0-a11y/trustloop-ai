@@ -23,6 +23,7 @@ export function Provider({ children }: { children: React.ReactNode }) {
       setUser(await api.session());
       setError("");
     } catch (e) {
+      setUser(null);
       setError(e instanceof Error ? e.message : "Could not load session.");
     } finally {
       setLoading(false);

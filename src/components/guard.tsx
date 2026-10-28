@@ -9,9 +9,11 @@ export function Guard({
   role?: Role;
   children: React.ReactNode;
 }) {
-  const { user, loading } = useSession();
+  const { user, loading, error } = useSession();
   if (loading)
     return <div className="skeleton" aria-label="Checking session" />;
+  // The shell exposes the connection error and retry action.
+  if (error) return null;
   if (!user)
     return (
       <div className="empty-state">

@@ -1691,3 +1691,8 @@ p {
     transition: none !important;
   }
 }
+
+.demo-notice {
+  margin: 0 0 24px;
+  font-size: 12px;
+}

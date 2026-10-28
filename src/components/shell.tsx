@@ -33,6 +33,7 @@ export function Shell({ children }: { children: React.ReactNode }) {
             <Link
               key={href}
               href={href}
+              aria-current={path.startsWith(href) ? "page" : undefined}
               className={`nav-link ${path.startsWith(href) ? "active" : ""}`}
             >
               <Icon name={icon} />
@@ -130,6 +131,11 @@ export function Shell({ children }: { children: React.ReactNode }) {
           </div>
         </header>
         <main id="main-content" className="content">
+          {isDemo && (
+            <p className="notice demo-notice" role="status">
+              Demo mode · local browser data and simulated accounts.
+            </p>
+          )}
           {error && (
             <p className="error" role="alert">
               {error}{" "}

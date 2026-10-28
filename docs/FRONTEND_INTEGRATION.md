@@ -69,3 +69,15 @@ npm run test:e2e
 ```
 
 The browser test starts its own local production server on port 3015 and uses a fresh isolated browser context. Keep `NEXT_PUBLIC_API_BASE_URL` unset for this demo test. Optional `PLAYWRIGHT_CHROMIUM_EXECUTABLE_PATH` and `PLAYWRIGHT_CHROMIUM_ARGS` (JSON array) support a preinstalled Chromium runtime.
+
+## Frontend readiness review · October 28, 2026
+
+All listed routes are implemented. Frontend data access remains centralized in `src/lib/api.ts`; no API routes, database setup, Supabase configuration or backend branch changes are part of this work. Demo mode is identified inside the workspace content on desktop and mobile, as well as on authentication forms.
+
+The frontend includes loading, empty and request-error states, session retry, route error recovery and a custom 404. Authentication navigation uses the role returned by the adapter; role selection does not grant production permissions. Booking forms validate future time ranges and trimmed purpose length before API submission.
+
+### Backend handoff still required
+
+The contract above is proposed, not confirmed by the backend developer. Before integration, agree session/unauthenticated response behavior, response envelopes, owner resource scoping, training verification, allowed actions, image URLs and handover-token policy. The current QR/manual-code interface is complete for the documented demo; a camera scanner and server-issued token flow are not implemented. Real authentication, authorization, persistence and photo storage require the backend. No real-backend end-to-end result is claimed.
+
+Expanded browser coverage includes mobile landing/login/signup/404, the visible demo notice, and session failure/retry, alongside the complete booking and owner approval lifecycle.

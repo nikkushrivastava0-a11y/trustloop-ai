@@ -103,6 +103,17 @@ function BookingFields({ resourceId }: { resourceId: string }) {
                 throw new Error(
                   "This resource is unavailable or requires verified training.",
                 );
+              if (
+                Date.parse(starts) <= Date.now() ||
+                Date.parse(ends) <= Date.parse(starts)
+              )
+                throw new Error(
+                  "Choose a future start time and an end time after it.",
+                );
+              if (purpose.trim().length < 10)
+                throw new Error(
+                  "Tell us about your project in at least 10 characters.",
+                );
               const b = await api.createBooking({
                 resource_id: resource.id,
                 starts_at: new Date(starts).toISOString(),

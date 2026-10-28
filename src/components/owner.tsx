@@ -186,6 +186,17 @@ function OwnerWorkspace() {
         <div className="skeleton" />
       ) : tab === "resources" ? (
         <div className="stack">
+          {!resources.length && (
+            <div className="empty-state">
+              <h2>Your collection starts here.</h2>
+              <p>
+                Add your first resource so students can discover and request it.
+              </p>
+              <button className="button" onClick={() => setShowForm(true)}>
+                Add your first resource
+              </button>
+            </div>
+          )}
           {resources.map((r) => (
             <article className="panel" key={r.id}>
               <div className="booking-card-header">
