@@ -1,3 +1,4 @@
+import { ThemeToggle } from "@/components/theme-toggle";
 import Link from "next/link";
 import Image from "next/image";
 import { Brand } from "@/components/shell";
@@ -8,6 +9,7 @@ export default function Home() {
       <header className="marketing-nav">
         <Brand />
         <div>
+          <ThemeToggle />
           <Link href="/student">Explore resources</Link>
           <Link href="/login" className="button secondary">
             Log in <Icon name="arrow" size={16} />

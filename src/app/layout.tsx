@@ -1,6 +1,5 @@
 import type { Metadata } from "next";
 import { Provider } from "@/components/provider";
-import { ThemeToggle } from "@/components/theme-toggle";
 import "./globals.css";
 export const metadata: Metadata = {
   title: {
@@ -28,7 +27,6 @@ export default function RootLayout({
           Skip to content
         </a>
         <Provider>{children}</Provider>
-        <ThemeToggle />
       </body>
     </html>
   );

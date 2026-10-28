@@ -2,6 +2,7 @@
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { useState } from "react";
+import { ThemeToggle } from "./theme-toggle";
 import { Icon } from "./icons";
 import { useSession } from "./provider";
 import { api, isDemo } from "@/lib/api";
@@ -58,6 +59,7 @@ export function Shell({ children }: { children: React.ReactNode }) {
               <span /> Interactive demo · local data
             </div>
           )}
+          <ThemeToggle />
           <div className="profile">
             <span className="avatar">{user?.name.slice(0, 1) || "G"}</span>
             <div>

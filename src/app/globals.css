@@ -1698,15 +1698,8 @@ p {
   font-size: 12px;
 }
 
-/* Theme controls remain available on every route, including authentication. */
-body {
-  padding-bottom: 64px;
-}
+/* Theme controls live in navigation rather than floating over content. */
 .theme-toggle {
-  position: fixed;
-  bottom: 16px;
-  right: 18px;
-  z-index: 50;
   display: inline-flex;
   align-items: center;
   gap: 8px;
@@ -1902,4 +1895,36 @@ body {
 [data-theme="dark"] .qr-wrap canvas {
   background: white;
   border-radius: 8px;
+}
+
+.sidebar-bottom > .theme-toggle {
+  width: 100%;
+  justify-content: center;
+  margin-bottom: 16px;
+}
+.auth-theme {
+  display: flex;
+  justify-content: flex-end;
+  margin-bottom: 20px;
+}
+@media (max-width: 680px) {
+  .sidebar-bottom {
+    display: block;
+    padding-top: 12px;
+  }
+  .sidebar-bottom > :not(.theme-toggle) {
+    display: none;
+  }
+  .sidebar-bottom > .theme-toggle {
+    width: auto;
+    margin-bottom: 0;
+  }
+  .marketing-nav {
+    flex-wrap: wrap;
+    gap: 12px;
+  }
+  .marketing-nav > div {
+    flex-wrap: wrap;
+    gap: 10px;
+  }
 }

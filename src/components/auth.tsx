@@ -1,4 +1,5 @@
 "use client";
+import { ThemeToggle } from "./theme-toggle";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
@@ -66,6 +67,9 @@ export function Auth({ mode }: { mode: "login" | "signup" }) {
             }
           }}
         >
+          <div className="auth-theme">
+            <ThemeToggle />
+          </div>
           <div className="eyebrow green">WELCOME TO THE LOOP</div>
           <h1>
             {mode === "login"
