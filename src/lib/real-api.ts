@@ -36,11 +36,13 @@ export const realApi = {
     if (error || !user) return null;
     const { data: profile } = await db.from("profiles")
       .select("full_name,role,training_verified").eq("id", user.id).maybeSingle();
+    const { data: ownedResources } = await db.from("resources").select("id").eq("owner_id", user.id).limit(1);
+    const ownsResources = (ownedResources?.length || 0) > 0;
     return {
       id: user.id,
       email: user.email || "",
       name: profile?.full_name || user.email?.split("@")[0] || "Member",
-      role: profile?.role === "owner" || profile?.role === "manager" ? "owner" : "student",
+      role: profile?.role === "owner" || profile?.role === "manager" || ownsResources ? "owner" : "student",
       trained_resource_ids: [],
     };
   },
