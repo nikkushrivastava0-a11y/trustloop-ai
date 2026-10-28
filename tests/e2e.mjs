@@ -54,7 +54,45 @@ async function login(page, role) {
     const errors = [];
     page.on("pageerror", (error) => errors.push(error.message));
     page.setDefaultTimeout(10000);
+    await page.emulateMedia({ colorScheme: "dark" });
     await page.goto(`${origin}/student`);
+    const themeButton = page.getByRole("button", {
+      name: "Dark mode",
+      exact: true,
+    });
+    await page.waitForFunction(
+      () => document.documentElement.dataset.theme === "dark",
+    );
+    await themeButton.click();
+    assert.equal(
+      await page.locator("html").getAttribute("data-theme"),
+      "light",
+    );
+    await page.reload();
+    assert.equal(
+      await page.locator("html").getAttribute("data-theme"),
+      "light",
+      "Explicit light preference survives reload over dark system setting",
+    );
+    await themeButton.click();
+    await page.emulateMedia({ colorScheme: "light" });
+    for (const route of ["/", "/login", "/signup", "/student"]) {
+      await page.goto(`${origin}${route}`);
+      assert.equal(
+        await page.locator("html").getAttribute("data-theme"),
+        "dark",
+        "Dark preference survives navigation and system theme changes",
+      );
+    }
+    assert.equal(
+      await page
+        .locator("body")
+        .evaluate((el) => getComputedStyle(el).backgroundColor),
+      "rgb(17, 28, 23)",
+    );
+    console.log(
+      "PASS system theme, toggle, saved preference and route navigation",
+    );
     await page
       .getByRole("link", { name: "Sony Alpha A7 IV", exact: true })
       .waitFor();
