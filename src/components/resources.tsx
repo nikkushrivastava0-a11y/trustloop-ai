@@ -63,7 +63,11 @@ export function ResourceCard({ resource }: { resource: Resource }) {
               name={resource.requires_training ? "shield" : "check"}
               size={14}
             />
-            {resource.requires_training ? "Training required" : "Ready to book"}
+            {!resource.available
+              ? "Currently in use"
+              : resource.requires_training
+                ? "Training required"
+                : "Ready to book"}
           </span>
           <Link href={`/resources/${resource.id}`}>View details</Link>
         </div>
