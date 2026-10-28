@@ -1,5 +1,94 @@
-import Link from 'next/link';
-import Image from 'next/image';
-import { Brand } from '@/components/shell';
-import { Icon } from '@/components/icons';
-export default function Home(){return <><header className="marketing-nav"><Brand/><div><Link href="/student">Explore resources</Link><Link href="/login" className="button secondary">Log in <Icon name="arrow" size={16}/></Link></div></header><main id="main-content"><section className="landing-hero"><div><span className="tag"><Icon name="spark" size={14}/> A CAMPUS BUILT ON POSSIBILITY</span><h1>Your next big idea.<br/><span>Within reach.</span></h1><p>Great work shouldn’t wait for the right equipment. Discover, borrow and share your campus resources — all in one trusted loop.</p><div className="action-row"><Link href="/student" className="button">Discover resources <Icon name="arrow" size={17}/></Link><Link href="/signup" className="button secondary">Join the community</Link></div></div><div className="landing-art"><Image src="/equipment/camera.svg" alt="Campus camera equipment available to borrow" width={480} height={300} priority/><div className="panel"><span className="stat-icon"><Icon name="check"/></span><div><strong>Less ownership. More possibility.</strong><p>Your next project starts with a shared resource.</p></div><Icon name="arrow"/></div></div></section><section className="landing-features">{[['search','Find your spark','Explore the equipment and spaces already around you. Search by category, location or what you want to create.'],['shield','Book with confidence','Clear eligibility, fair owner review and transparent booking statuses keep everyone in the loop.'],['qr','Close the loop','Record equipment condition, confirm handovers and keep a shared history of every resource.']].map(([icon,title,copy])=><article key={title}><Icon name={icon} size={27}/><h3>{title}</h3><p>{copy}</p></article>)}</section></main><footer className="app-footer"><span>© TrustLoop AI</span><span>Built for a campus that shares.</span><Link href="/owner">Resource owner workspace →</Link></footer></>}
+import Link from "next/link";
+import Image from "next/image";
+import { Brand } from "@/components/shell";
+import { Icon } from "@/components/icons";
+export default function Home() {
+  return (
+    <>
+      <header className="marketing-nav">
+        <Brand />
+        <div>
+          <Link href="/student">Explore resources</Link>
+          <Link href="/login" className="button secondary">
+            Log in <Icon name="arrow" size={16} />
+          </Link>
+        </div>
+      </header>
+      <main id="main-content">
+        <section className="landing-hero">
+          <div>
+            <span className="tag">
+              <Icon name="spark" size={14} /> A CAMPUS BUILT ON POSSIBILITY
+            </span>
+            <h1>
+              Your next big idea.
+              <br />
+              <span>Within reach.</span>
+            </h1>
+            <p>
+              Great work shouldn’t wait for the right equipment. Discover,
+              borrow and share your campus resources — all in one trusted loop.
+            </p>
+            <div className="action-row">
+              <Link href="/student" className="button">
+                Discover resources <Icon name="arrow" size={17} />
+              </Link>
+              <Link href="/signup" className="button secondary">
+                Join the community
+              </Link>
+            </div>
+          </div>
+          <div className="landing-art">
+            <Image
+              src="/equipment/camera.svg"
+              alt="Campus camera equipment available to borrow"
+              width={480}
+              height={300}
+              priority
+            />
+            <div className="panel">
+              <span className="stat-icon">
+                <Icon name="check" />
+              </span>
+              <div>
+                <strong>Less ownership. More possibility.</strong>
+                <p>Your next project starts with a shared resource.</p>
+              </div>
+              <Icon name="arrow" />
+            </div>
+          </div>
+        </section>
+        <section className="landing-features">
+          {[
+            [
+              "search",
+              "Find your spark",
+              "Explore the equipment and spaces already around you. Search by category, location or what you want to create.",
+            ],
+            [
+              "shield",
+              "Book with confidence",
+              "Clear eligibility, fair owner review and transparent booking statuses keep everyone in the loop.",
+            ],
+            [
+              "qr",
+              "Close the loop",
+              "Record equipment condition, confirm handovers and keep a shared history of every resource.",
+            ],
+          ].map(([icon, title, copy]) => (
+            <article key={title}>
+              <Icon name={icon} size={27} />
+              <h3>{title}</h3>
+              <p>{copy}</p>
+            </article>
+          ))}
+        </section>
+      </main>
+      <footer className="app-footer">
+        <span>© TrustLoop AI</span>
+        <span>Built for a campus that shares.</span>
+        <Link href="/owner">Resource owner workspace →</Link>
+      </footer>
+    </>
+  );
+}

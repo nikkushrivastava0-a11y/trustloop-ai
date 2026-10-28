@@ -1,11 +1,179 @@
-'use client';
-import Link from 'next/link';
-import { useEffect, useState } from 'react';
-import { api } from '@/lib/api';
-import { eligible, formatDate } from '@/lib/domain';
-import type { Booking, Resource } from '@/lib/types';
-import { Shell } from './shell';
-import { ResourceArt } from './resources';
-import { Icon } from './icons';
-import { useSession } from './provider';
-export function ResourceDetail({id}:{id:string}){const {user,loading:sessionLoading}=useSession();const [resource,setResource]=useState<Resource>();const [slots,setSlots]=useState<Pick<Booking,'id'|'starts_at'|'ends_at'|'status'>[]>([]);const [loading,setLoading]=useState(true);const [error,setError]=useState('');async function load(){setLoading(true);try{const [all,busy]=await Promise.all([api.resources(),api.resourceBookings(id)]);setResource(all.find(r=>r.id===id));setSlots(busy);setError('');}catch(e){setError((e as Error).message);}finally{setLoading(false);}}useEffect(()=>{let active=true;Promise.all([api.resources(),api.resourceBookings(id)]).then(([all,busy])=>{if(active){setResource(all.find(r=>r.id===id));setSlots(busy);setLoading(false);}}).catch(e=>{if(active){setError(e.message);setLoading(false);}});return()=>{active=false;};},[id]);return <Shell><Link href="/student" className="back-link">← Back to resources</Link>{loading?<div className="skeleton"/>:error?<div className="error" role="alert">{error} <button onClick={()=>void load()}>Retry</button></div>:!resource?<div className="empty-state"><h1>Resource not found</h1><p>This resource may have been removed.</p><Link className="button" href="/student">Explore resources</Link></div>:<div className="detail-grid"><div className="detail-copy"><ResourceArt resource={resource} large/><div className="eyebrow green">{resource.category} / CAMPUS COLLECTION</div><h1>{resource.title}</h1><div className="location"><Icon name="pin" size={16}/>{resource.location}</div><p>{resource.description}</p><div className="panel"><h2>A little care goes a long way.</h2><p>Before you borrow, take a moment to read the resource guidelines.</p><ul className="rules-list">{resource.rules.map((rule,i)=><li key={i}>{rule}</li>)}</ul></div><div className="panel"><h2>Booking availability</h2><p>Choose a future start and end time. Confirmed reservations below are unavailable; the server validates your request again.</p>{slots.length?<div className="stack" style={{marginTop:16}}>{slots.map(b=><div key={b.id} className="notice">Reserved · {formatDate(b.starts_at)} → {formatDate(b.ends_at)}</div>)}</div>:<p style={{marginTop:15}}>No confirmed reservations. Pick a time that works for your project.</p>}</div></div><aside className="panel booking-panel"><span className={`availability ${resource.available?'':'unavailable'}`}><span/>{resource.available?'Accepting requests':'Currently unavailable'}</span><h2>Make room for your idea.</h2><p>Request this resource. The owner will review your project and confirm availability.</p><div className="bottom-note" style={{margin:'22px 0'}}><Icon name="shield"/><div><strong>{resource.requires_training?'Training required':'No training required'}</strong><p>{resource.requires_training?(eligible(resource,user)?'Your training is verified.':'Ask the resource owner to verify your training.'): 'Your campus account is all you need.'}</p></div></div>{sessionLoading?<p>Checking your eligibility…</p>:!user?<Link href="/login" className="button full">Log in to book <Icon name="arrow" size={16}/></Link>:user.role!=='student'?<div className="notice">Use a student account to request this resource.</div>:<Link href={`/bookings/new?resource=${resource.id}`} className="button full">Choose booking time <Icon name="arrow" size={16}/></Link>}<p style={{textAlign:'center',fontSize:10,marginTop:15}}>Borrow thoughtfully. Return responsibly.</p></aside></div>}</Shell>}
+"use client";
+import Link from "next/link";
+import { useEffect, useState } from "react";
+import { api } from "@/lib/api";
+import { eligible, formatDate } from "@/lib/domain";
+import type { Booking, Resource } from "@/lib/types";
+import { Shell } from "./shell";
+import { ResourceArt } from "./resources";
+import { Icon } from "./icons";
+import { useSession } from "./provider";
+export function ResourceDetail({ id }: { id: string }) {
+  const { user, loading: sessionLoading } = useSession();
+  const [resource, setResource] = useState<Resource>();
+  const [slots, setSlots] = useState<
+    Pick<Booking, "id" | "starts_at" | "ends_at" | "status">[]
+  >([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
+  async function load() {
+    setLoading(true);
+    try {
+      const [all, busy] = await Promise.all([
+        api.resources(),
+        api.resourceBookings(id),
+      ]);
+      setResource(all.find((r) => r.id === id));
+      setSlots(busy);
+      setError("");
+    } catch (e) {
+      setError((e as Error).message);
+    } finally {
+      setLoading(false);
+    }
+  }
+  useEffect(() => {
+    let active = true;
+    Promise.all([api.resources(), api.resourceBookings(id)])
+      .then(([all, busy]) => {
+        if (active) {
+          setResource(all.find((r) => r.id === id));
+          setSlots(busy);
+          setLoading(false);
+        }
+      })
+      .catch((e) => {
+        if (active) {
+          setError(e.message);
+          setLoading(false);
+        }
+      });
+    return () => {
+      active = false;
+    };
+  }, [id]);
+  return (
+    <Shell>
+      <Link href="/student" className="back-link">
+        ← Back to resources
+      </Link>
+      {loading ? (
+        <div className="skeleton" />
+      ) : error ? (
+        <div className="error" role="alert">
+          {error} <button onClick={() => void load()}>Retry</button>
+        </div>
+      ) : !resource ? (
+        <div className="empty-state">
+          <h1>Resource not found</h1>
+          <p>This resource may have been removed.</p>
+          <Link className="button" href="/student">
+            Explore resources
+          </Link>
+        </div>
+      ) : (
+        <div className="detail-grid">
+          <div className="detail-copy">
+            <ResourceArt resource={resource} large />
+            <div className="eyebrow green">
+              {resource.category} / CAMPUS COLLECTION
+            </div>
+            <h1>{resource.title}</h1>
+            <div className="location">
+              <Icon name="pin" size={16} />
+              {resource.location}
+            </div>
+            <p>{resource.description}</p>
+            <div className="panel">
+              <h2>A little care goes a long way.</h2>
+              <p>
+                Before you borrow, take a moment to read the resource
+                guidelines.
+              </p>
+              <ul className="rules-list">
+                {resource.rules.map((rule, i) => (
+                  <li key={i}>{rule}</li>
+                ))}
+              </ul>
+            </div>
+            <div className="panel">
+              <h2>Booking availability</h2>
+              <p>
+                Choose a future start and end time. Confirmed reservations below
+                are unavailable; the server validates your request again.
+              </p>
+              {slots.length ? (
+                <div className="stack" style={{ marginTop: 16 }}>
+                  {slots.map((b) => (
+                    <div key={b.id} className="notice">
+                      Reserved · {formatDate(b.starts_at)} →{" "}
+                      {formatDate(b.ends_at)}
+                    </div>
+                  ))}
+                </div>
+              ) : (
+                <p style={{ marginTop: 15 }}>
+                  No confirmed reservations. Pick a time that works for your
+                  project.
+                </p>
+              )}
+            </div>
+          </div>
+          <aside className="panel booking-panel">
+            <span
+              className={`availability ${resource.available ? "" : "unavailable"}`}
+            >
+              <span />
+              {resource.available
+                ? "Accepting requests"
+                : "Currently unavailable"}
+            </span>
+            <h2>Make room for your idea.</h2>
+            <p>
+              Request this resource. The owner will review your project and
+              confirm availability.
+            </p>
+            <div className="bottom-note" style={{ margin: "22px 0" }}>
+              <Icon name="shield" />
+              <div>
+                <strong>
+                  {resource.requires_training
+                    ? "Training required"
+                    : "No training required"}
+                </strong>
+                <p>
+                  {resource.requires_training
+                    ? eligible(resource, user)
+                      ? "Your training is verified."
+                      : "Ask the resource owner to verify your training."
+                    : "Your campus account is all you need."}
+                </p>
+              </div>
+            </div>
+            {sessionLoading ? (
+              <p>Checking your eligibility…</p>
+            ) : !user ? (
+              <Link href="/login" className="button full">
+                Log in to book <Icon name="arrow" size={16} />
+              </Link>
+            ) : user.role !== "student" ? (
+              <div className="notice">
+                Use a student account to request this resource.
+              </div>
+            ) : (
+              <Link
+                href={`/bookings/new?resource=${resource.id}`}
+                className="button full"
+              >
+                Choose booking time <Icon name="arrow" size={16} />
+              </Link>
+            )}
+            <p style={{ textAlign: "center", fontSize: 10, marginTop: 15 }}>
+              Borrow thoughtfully. Return responsibly.
+            </p>
+          </aside>
+        </div>
+      )}
+    </Shell>
+  );
+}
