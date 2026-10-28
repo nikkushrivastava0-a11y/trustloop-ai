@@ -1,5 +1,6 @@
 @import "tailwindcss";
 :root {
+  color-scheme: light;
   --ink: #243c35;
   --muted: #7a8680;
   --green: #26715c;
@@ -1689,5 +1690,241 @@ p {
   *:after {
     animation: none !important;
     transition: none !important;
+  }
+}
+
+.demo-notice {
+  margin: 0 0 24px;
+  font-size: 12px;
+}
+
+/* Theme controls live in navigation rather than floating over content. */
+.theme-toggle {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  min-height: 44px;
+  padding: 9px 15px;
+  border: 1px solid var(--line);
+  border-radius: 24px;
+  background: var(--paper);
+  color: var(--ink);
+  box-shadow: 0 4px 18px #0002;
+  font-size: 12px;
+  font-weight: 600;
+}
+.theme-toggle span {
+  font-size: 20px;
+  line-height: 1;
+}
+:root[data-theme="dark"] {
+  color-scheme: dark;
+  --ink: #e1eee7;
+  --muted: #a7bab0;
+  --green: #78c9a7;
+  --line: #344a40;
+  --paper: #111c17;
+}
+[data-theme="dark"]
+  :is(
+    .sidebar,
+    .topbar,
+    .stats-strip,
+    .panel,
+    .resource-card,
+    .empty-state,
+    .search-field,
+    .sort-select,
+    .count-label,
+    .role-switch button,
+    .button.secondary
+  ) {
+  background: #1b2a22;
+  color: var(--ink);
+  border-color: var(--line);
+}
+[data-theme="dark"]
+  :is(
+    .community-card,
+    .discovery-banner,
+    .auth-story,
+    .landing-art,
+    .bottom-note,
+    .booking-purpose,
+    .report-card,
+    .stat-icon,
+    .avatar,
+    .campus-pill,
+    .ai
+  ) {
+  background: #253b2f;
+  color: #c4ddcb;
+  border-color: var(--line);
+}
+[data-theme="dark"]
+  :is(
+    .workspace-label,
+    .nav-link,
+    .demo-label,
+    .breadcrumb,
+    .breadcrumb span,
+    .breadcrumb strong,
+    .app-footer,
+    .eyebrow,
+    .tag,
+    .banner-copy p,
+    .banner-caption,
+    .stats-strip div div > span,
+    .count-label,
+    .search-field,
+    .sort-select,
+    .sort-select select,
+    .category-tabs button,
+    .filter-checks,
+    .art-label,
+    .location,
+    .resource-bottom,
+    .back-link,
+    .rules-list,
+    .field small,
+    .booking-meta,
+    .timeline-item small,
+    .auth-foot,
+    .auth-demo,
+    .auth-quote
+  ) {
+  color: var(--muted);
+}
+[data-theme="dark"]
+  :is(
+    .eyebrow.green,
+    .ready,
+    .resource-bottom a,
+    .landing-features svg,
+    h1 span,
+    .mini-icon
+  ) {
+  color: #8ed4b1;
+}
+[data-theme="dark"]
+  :is(
+    .nav-link.active,
+    .category-tabs button.selected,
+    .role-switch button.selected,
+    .nav-link:hover,
+    .icon-button:hover,
+    .button.secondary:hover
+  ) {
+  background: #304c3a;
+  color: #b8e7cb;
+  border-color: #587d63;
+}
+[data-theme="dark"]
+  :is(.field input, .field textarea, .field select, select option) {
+  background: #14231b;
+  color: var(--ink);
+  border-color: #476151;
+}
+[data-theme="dark"] input::placeholder,
+[data-theme="dark"] textarea::placeholder {
+  color: #a0b3a7;
+  opacity: 1;
+}
+[data-theme="dark"] .auth-form-wrap {
+  background: var(--paper);
+}
+[data-theme="dark"] .button:not(.secondary):not(.danger),
+[data-theme="dark"] .brand-mark {
+  background: #78c9a7;
+  color: #10291c;
+}
+[data-theme="dark"] .button:not(.secondary):not(.danger):hover {
+  background: #9bdcbd;
+}
+[data-theme="dark"]
+  :is(
+    .notice,
+    .status.requested,
+    .status.waitlisted,
+    .availability.unavailable
+  ) {
+  background: #3e3520;
+  color: #f0d391;
+  border-color: #77603a;
+}
+[data-theme="dark"]
+  :is(.success, .status.approved, .status.returned, .availability) {
+  background: #254530;
+  color: #ace1b7;
+  border-color: #4a7954;
+}
+[data-theme="dark"]
+  :is(.error, .button.danger, .status.rejected, .status.cancelled) {
+  background: #482c29;
+  color: #ffbdb0;
+  border-color: #875149;
+}
+[data-theme="dark"] .status.checked_out {
+  background: #253c55;
+  color: #b5d5ff;
+}
+[data-theme="dark"]
+  .status:not(.requested):not(.waitlisted):not(.approved):not(.returned):not(
+    .rejected
+  ):not(.cancelled):not(.checked_out) {
+  background: #354339;
+  color: #c4d4c9;
+}
+[data-theme="dark"] .training {
+  color: #edce91;
+}
+[data-theme="dark"] :is(.resource-bottom, .timeline, .auth-quote, .auth-demo) {
+  border-color: var(--line);
+}
+[data-theme="dark"] .skeleton {
+  background: linear-gradient(90deg, #22362a, #344e3c, #22362a);
+  background-size: 200% 100%;
+}
+/* Keep original equipment artwork legible and QR passes white for scanning. */
+[data-theme="dark"] .resource-art {
+  color: #243c35;
+}
+[data-theme="dark"] .art-label {
+  color: #46583e;
+}
+[data-theme="dark"] .qr-wrap canvas {
+  background: white;
+  border-radius: 8px;
+}
+
+.sidebar-bottom > .theme-toggle {
+  width: 100%;
+  justify-content: center;
+  margin-bottom: 16px;
+}
+.auth-theme {
+  display: flex;
+  justify-content: flex-end;
+  margin-bottom: 20px;
+}
+@media (max-width: 680px) {
+  .sidebar-bottom {
+    display: block;
+    padding-top: 12px;
+  }
+  .sidebar-bottom > :not(.theme-toggle) {
+    display: none;
+  }
+  .sidebar-bottom > .theme-toggle {
+    width: auto;
+    margin-bottom: 0;
+  }
+  .marketing-nav {
+    flex-wrap: wrap;
+    gap: 12px;
+  }
+  .marketing-nav > div {
+    flex-wrap: wrap;
+    gap: 10px;
   }
 }
