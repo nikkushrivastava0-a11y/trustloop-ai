@@ -49,6 +49,12 @@ function BookingFields({ resourceId }: { resourceId: string }) {
       active = false;
     };
   }, [resourceId]);
+  const startMs = Date.parse(starts);
+  const endMs = Date.parse(ends);
+  const bookingWindowValid =
+    Number.isFinite(startMs) && Number.isFinite(endMs) &&
+    startMs > Date.now() && endMs > startMs &&
+    endMs - startMs <= 7 * 24 * 60 * 60 * 1000;
   if (loading) return <div className="skeleton" />;
   if (!resource)
     return (
@@ -103,6 +109,8 @@ function BookingFields({ resourceId }: { resourceId: string }) {
                 throw new Error(
                   "This resource is unavailable or requires verified training.",
                 );
+              if (!bookingWindowValid)
+                throw new Error("Choose a future start and an end after it, within 7 days.");
               const b = await api.createBooking({
                 resource_id: resource.id,
                 starts_at: new Date(starts).toISOString(),
@@ -129,7 +137,7 @@ function BookingFields({ resourceId }: { resourceId: string }) {
                 required
                 type="datetime-local"
                 value={starts}
-                onChange={(e) => setStarts(e.target.value)}
+                onChange={(e) => { setStarts(e.target.value); setError(""); }}
               />
             </label>
             <label className="field">
@@ -139,10 +147,16 @@ function BookingFields({ resourceId }: { resourceId: string }) {
                 type="datetime-local"
                 value={ends}
                 min={starts}
-                onChange={(e) => setEnds(e.target.value)}
+                onChange={(e) => { setEnds(e.target.value); setError(""); }}
               />
             </label>
           </div>
+          {starts && ends && !bookingWindowValid && (
+            <p className="notice" role="alert">
+              Start must be in the future, and end must be after start within 7 days.
+              Example: 29 Oct 2026, 11:00 AM to 12:00 PM.
+            </p>
+          )}
           <label className="field">
             What are you working on?
             <textarea
@@ -193,7 +207,7 @@ function BookingFields({ resourceId }: { resourceId: string }) {
           )}
           <button
             className="button full"
-            disabled={busy || !allowed || !accepted}
+            disabled={busy || !allowed || !accepted || !bookingWindowValid}
           >
             {busy ? "Sending your request…" : "Send booking request"}
             <Icon name="arrow" size={16} />
