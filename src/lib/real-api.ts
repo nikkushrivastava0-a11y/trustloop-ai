@@ -38,12 +38,17 @@ export const realApi = {
       .select("full_name,role,training_verified").eq("id", user.id).maybeSingle();
     const { data: ownedResources } = await db.from("resources").select("id").eq("owner_id", user.id).limit(1);
     const ownsResources = (ownedResources?.length || 0) > 0;
+    // Training is a profile-level flag in the live schema; reflect it in UI
+    // eligibility instead of always treating verified students as untrained.
+    const { data: trainingResources } = profile?.training_verified
+      ? await db.from("resources").select("id").eq("requires_training", true)
+      : { data: [] as { id: string }[] };
     return {
       id: user.id,
       email: user.email || "",
       name: profile?.full_name || user.email?.split("@")[0] || "Member",
       role: profile?.role === "owner" || profile?.role === "manager" || ownsResources ? "owner" : "student",
-      trained_resource_ids: [],
+      trained_resource_ids: (trainingResources || []).map((resource) => resource.id),
     };
   },
   async authenticate(mode: "login" | "signup", input: { name: string; email: string; password: string; role: Role }): Promise<User> {
