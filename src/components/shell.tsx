@@ -2,6 +2,7 @@
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { useState } from "react";
+import { ThemeToggle } from "./theme-toggle";
 import { Icon } from "./icons";
 import { useSession } from "./provider";
 import { api, isDemo } from "@/lib/api";
@@ -33,6 +34,7 @@ export function Shell({ children }: { children: React.ReactNode }) {
             <Link
               key={href}
               href={href}
+              aria-current={path.startsWith(href) ? "page" : undefined}
               className={`nav-link ${path.startsWith(href) ? "active" : ""}`}
             >
               <Icon name={icon} />
@@ -57,6 +59,7 @@ export function Shell({ children }: { children: React.ReactNode }) {
               <span /> Interactive demo · local data
             </div>
           )}
+          <ThemeToggle />
           <div className="profile">
             <span className="avatar">{user?.name.slice(0, 1) || "G"}</span>
             <div>
@@ -130,6 +133,11 @@ export function Shell({ children }: { children: React.ReactNode }) {
           </div>
         </header>
         <main id="main-content" className="content">
+          {isDemo && (
+            <p className="notice demo-notice" role="status">
+              Demo mode · local browser data and simulated accounts.
+            </p>
+          )}
           {error && (
             <p className="error" role="alert">
               {error}{" "}
