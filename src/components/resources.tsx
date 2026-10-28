@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useEffect, useState } from "react";
 import { api } from "@/lib/api";
 import { presentation } from "@/lib/fixtures";
+import { matchResources } from "@/lib/resource-matcher";
 import type { Resource } from "@/lib/types";
 import { Icon } from "./icons";
 import { Shell } from "./shell";
@@ -81,6 +82,8 @@ export function Discover() {
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(true);
   const [query, setQuery] = useState("");
+  const [projectNeed, setProjectNeed] = useState("");
+  const [showMatches, setShowMatches] = useState(false);
   const [category, setCategory] = useState("All resources");
   const [available, setAvailable] = useState(false);
   const [training, setTraining] = useState(false);
@@ -116,6 +119,9 @@ export function Discover() {
       active = false;
     };
   }, []);
+  const matches = showMatches && projectNeed.trim().length >= 3
+    ? matchResources(projectNeed, items, user?.trained_resource_ids || []).slice(0, 3)
+    : [];
   const categories = [
     "All resources",
     ...new Set(items.map((r) => r.category)),
@@ -224,6 +230,43 @@ export function Discover() {
           </div>
         </div>
       </div>
+      <section className="panel" aria-labelledby="smart-match-heading" style={{ marginBottom: 28 }}>
+        <div className="eyebrow green">EXPLAINABLE RESOURCE MATCHING</div>
+        <h2 id="smart-match-heading" style={{ marginTop: 10 }}>Tell us what you're building.</h2>
+        <p>Describe your project to find fitting equipment, with availability and training requirements shown upfront.</p>
+        <form onSubmit={(event) => { event.preventDefault(); setShowMatches(true); }} style={{ display: "flex", flexWrap: "wrap", gap: 12, marginTop: 16 }}>
+          <input
+            aria-label="Describe your project for resource matching"
+            value={projectNeed}
+            maxLength={300}
+            onChange={(event) => { setProjectNeed(event.target.value); setShowMatches(false); }}
+            placeholder="e.g. I want to record a documentary or build a 3D prototype"
+            style={{ flex: "1 1 280px", minWidth: 0 }}
+            required
+            minLength={3}
+          />
+          <button type="submit" className="button">Find matching tools</button>
+        </form>
+        {showMatches && (
+          <div aria-live="polite" style={{ marginTop: 16 }}>
+            {matches.length ? (
+              <div className="resource-grid">
+                {matches.map(({ resource, reasons, bookable }) => (
+                  <div key={resource.id} className="panel">
+                    <div className="eyebrow">{resource.category}</div>
+                    <h3><Link href={`/resources/${resource.id}`}>{resource.title}</Link></h3>
+                    <p>{reasons.join(" · ")}</p>
+                    <Link className="button secondary" href={`/resources/${resource.id}`}>
+                      {bookable ? "View and request" : "View requirements"}
+                    </Link>
+                  </div>
+                ))}
+              </div>
+            ) : <p role="status">No strong matches yet. Browse the full collection below or try a different description.</p>}
+            <small>How it works: keyword and capability matching only. Recommendations use listed resource data; this is not generative AI.</small>
+          </div>
+        )}
+      </section>
       <section id="resource-list" className="listing">
         <div className="section-heading">
           <div>
