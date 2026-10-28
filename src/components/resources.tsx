@@ -128,7 +128,7 @@ export function Discover() {
         (!training || !r.requires_training) &&
         `${r.title} ${r.category} ${r.description} ${r.location}`
           .toLowerCase()
-          .includes(query.toLowerCase()),
+          .includes(query.trim().toLowerCase()),
     )
     .sort((a, b) =>
       sort === "name"
@@ -230,7 +230,13 @@ export function Discover() {
             <h2>Find your next resource</h2>
             <p>Equipment for your curiosity. Access for your ambition.</p>
           </div>
-          <span className="count-label">{filtered.length} resources</span>
+          <span className="count-label" role="status">
+            {loading
+              ? "Loading resources…"
+              : error
+                ? "Collection unavailable"
+                : `${filtered.length} resources`}
+          </span>
         </div>
         <div className="search-toolbar">
           <label className="search-field">
