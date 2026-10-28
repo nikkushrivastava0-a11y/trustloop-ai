@@ -1,3 +1,4 @@
+import { realApi } from "./real-api";
 import { resources, seedBookings } from "./fixtures";
 import { validateBooking, validateTransition } from "./domain";
 import type {
@@ -10,7 +11,7 @@ import type {
   User,
   Role,
 } from "./types";
-const base = process.env.NEXT_PUBLIC_API_BASE_URL;
+const base = process.env.NEXT_PUBLIC_DEMO_MODE === "true" ? undefined : "/api";
 export const isDemo = !base;
 const key = "trustloop.demo.v1";
 interface DemoStore {
@@ -40,31 +41,12 @@ function read(): DemoStore {
 function save(data: DemoStore) {
   localStorage.setItem(key, JSON.stringify(data));
 }
-async function request<T>(path: string, init?: RequestInit): Promise<T> {
-  const response = await fetch(`${base}${path}`, {
-    ...init,
-    credentials: "include",
-    headers: {
-      ...(init?.body && !(init.body instanceof FormData)
-        ? { "Content-Type": "application/json" }
-        : {}),
-      ...init?.headers,
-    },
-  });
-  if (!response.ok) {
-    const error = await response
-      .json()
-      .catch(() => ({ message: "Request failed. Please try again." }));
-    throw new Error(error.message || `Request failed (${response.status})`);
-  }
-  return response.status === 204 ? (undefined as T) : response.json();
-}
 export const api = {
   async resources(): Promise<Resource[]> {
-    return base ? request("/resources") : read().resources;
+    return base ? realApi.resources() : read().resources;
   },
   async bookings(): Promise<Booking[]> {
-    if (base) return request("/bookings");
+    if (base) return realApi.bookings();
     const d = read();
     return d.user?.role === "owner"
       ? d.bookings
@@ -74,7 +56,7 @@ export const api = {
     id: string,
   ): Promise<Pick<Booking, "id" | "starts_at" | "ends_at" | "status">[]> {
     return base
-      ? request(`/resources/${encodeURIComponent(id)}/slots`)
+      ? realApi.resourceBookings(id)
       : read().bookings.filter(
           (b) =>
             b.resource_id === id &&
@@ -82,17 +64,13 @@ export const api = {
         );
   },
   async session(): Promise<User | null> {
-    return base ? request("/auth/session") : read().user;
+    return base ? realApi.session() : read().user;
   },
   async authenticate(
     mode: "login" | "signup",
     data: { name: string; email: string; password: string; role: Role },
   ): Promise<User> {
-    if (base)
-      return request(`/auth/${mode}`, {
-        method: "POST",
-        body: JSON.stringify(data),
-      });
+    if (base) return realApi.authenticate(mode, data);
     const d = read();
     const user: User = {
       id: data.role === "student" ? "demo-student" : "demo-owner",
@@ -107,17 +85,13 @@ export const api = {
     return user;
   },
   async logout() {
-    if (base) return request<void>("/auth/logout", { method: "POST" });
+    if (base) return realApi.logout();
     const d = read();
     d.user = null;
     save(d);
   },
   async createBooking(input: BookingInput): Promise<Booking> {
-    if (base)
-      return request("/bookings", {
-        method: "POST",
-        body: JSON.stringify(input),
-      });
+    if (base) return realApi.createBooking(input);
     const d = read();
     const resource = d.resources.find((r) => r.id === input.resource_id);
     if (!resource) throw new Error("Resource not found.");
@@ -142,11 +116,7 @@ export const api = {
     return booking;
   },
   async updateStatus(id: string, status: BookingStatus): Promise<Booking> {
-    if (base)
-      return request(`/bookings/${encodeURIComponent(id)}/status`, {
-        method: "PATCH",
-        body: JSON.stringify({ status }),
-      });
+    if (base) return realApi.updateStatus(id, status);
     const d = read(),
       booking = d.bookings.find((b) => b.id === id);
     if (!booking) throw new Error("Booking not found.");
@@ -169,11 +139,7 @@ export const api = {
     return booking;
   },
   async addResource(input: Omit<Resource, "id">): Promise<Resource> {
-    if (base)
-      return request("/resources", {
-        method: "POST",
-        body: JSON.stringify(input),
-      });
+    if (base) return realApi.addResource(input);
     const d = read();
     if (d.user?.role !== "owner") throw new Error("Owner access required.");
     const r = { ...input, id: crypto.randomUUID() };
@@ -184,7 +150,7 @@ export const api = {
   async history(
     id: string,
   ): Promise<{ events: BookingEvent[]; reports: ConditionReport[] }> {
-    if (base) return request(`/bookings/${encodeURIComponent(id)}/history`);
+    if (base) return realApi.history(id);
     const d = read();
     return {
       events: d.events.filter((e) => e.booking_id === id),
@@ -198,17 +164,7 @@ export const api = {
     photos: File[],
     code?: string,
   ): Promise<ConditionReport> {
-    if (base) {
-      const data = new FormData();
-      data.set("kind", kind);
-      data.set("notes", notes);
-      if (code) data.set("handover_code", code);
-      photos.forEach((file) => data.append("photos", file));
-      return request(`/bookings/${encodeURIComponent(id)}/condition-reports`, {
-        method: "POST",
-        body: data,
-      });
-    }
+    if (base) return realApi.report(id, kind, notes, photos, code);
     const d = read(),
       b = d.bookings.find((b) => b.id === id);
     if (!b) throw new Error("Booking not found.");
