@@ -147,7 +147,7 @@ function HandoverForm({ id, incident }: { id: string; incident: boolean }) {
                     throw new Error(
                       "This booking is not ready for a handover.",
                     );
-                  if (!incident && !photos.length)
+                  if (isDemo && !incident && !photos.length)
                     throw new Error("Add at least one condition photo.");
                   if (
                     photos.some(
@@ -208,7 +208,7 @@ function HandoverForm({ id, incident }: { id: string; incident: boolean }) {
                   }
                 />
               </label>
-              <label className="field">
+              {isDemo && <label className="field">
                 {incident
                   ? "Supporting photos (optional)"
                   : "Condition photos (required)"}
@@ -225,7 +225,8 @@ function HandoverForm({ id, incident }: { id: string; incident: boolean }) {
                     ? "Demo records filenames only; API mode uploads the original files."
                     : ""}
                 </small>
-              </label>
+              </label>}
+              {!isDemo && <p className="notice">Live mode currently records written condition evidence only. Photo uploads are not yet stored; do not claim photo evidence.</p>}
               {photos.length > 0 && (
                 <div className="photo-list">
                   Selected: {photos.map((f) => f.name).join(", ")}
