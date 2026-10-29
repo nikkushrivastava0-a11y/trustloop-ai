@@ -111,7 +111,7 @@ export const realApi = {
     const data = await request<{
       events: {id: number; action: string; created_at: string; details: Record<string, unknown>}[];
       reports: {id:string;booking_id:string;stage:"checkout"|"return";notes:string;photo_url:string|null;created_at:string}[];
-      incidents: {id:string;booking_id:string;kind:string;details:string;created_at:string}[];
+      incidents: {id:string;booking_id:string;kind:string;details:string;resolution:string|null;created_at:string}[];
     }>("/bookings/history?booking_id=" + encodeURIComponent(id));
     const events = data.events.map(e => ({
       id: String(e.id), booking_id: id, action: e.action,
@@ -126,7 +126,7 @@ export const realApi = {
       })),
       ...data.incidents.map(r => ({
         id:r.id,booking_id:r.booking_id,kind:"incident" as const,
-        notes:`${r.kind.toUpperCase()}: ${r.details}`,photo_names:[],created_at:r.created_at
+        notes:`${r.kind.toUpperCase()}: ${r.details}`,photo_names:[],created_at:r.created_at,resolution:r.resolution
       }))
     ];
     for (const report of data.reports) {
@@ -136,6 +136,9 @@ export const realApi = {
       if (matching && signed?.signedUrl) matching.photo_names = [signed.signedUrl];
     }
     return { events, reports };
+  },
+  async resolveIncident(id: string, resolution: string): Promise<void> {
+    await request("/bookings/resolve-incident", {method:"POST",body:JSON.stringify({incident_id:id,resolution})});
   },
   async handoverPass(id: string): Promise<string> {
     const db = client();
