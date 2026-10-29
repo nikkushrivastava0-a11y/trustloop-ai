@@ -256,7 +256,7 @@ export function Discover() {
       </div>
       <section className="panel" aria-labelledby="smart-match-heading" style={{ marginBottom: 28 }}>
         <div className="eyebrow green">EXPLAINABLE RESOURCE MATCHING</div>
-        <h2 id="smart-match-heading" style={{ marginTop: 10 }}>Tell us what you're building.</h2>
+        <h2 id="smart-match-heading" style={{ marginTop: 10 }}>Tell us what you&apos;re building.</h2>
         <p>Describe your project to find fitting equipment, with availability and training requirements shown upfront.</p>
         <form onSubmit={(event) => { event.preventDefault(); setShowMatches(true); }} style={{ display: "flex", flexWrap: "wrap", gap: 12, marginTop: 16 }}>
           <input
