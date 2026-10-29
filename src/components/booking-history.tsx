@@ -126,10 +126,15 @@ function History({ id }: { id: string }) {
                   <p>{r.notes}</p>
                   {r.photo_names.length > 0 && (
                     <div className="photo-list">
-                      {isDemo
-                        ? "Photo names recorded in demo:"
-                        : "Attached photos:"}{" "}
-                      {r.photo_names.join(", ")}
+                      {isDemo ? (
+                        <>Photo names recorded in demo: {r.photo_names.join(", ")}</>
+                      ) : (
+                        r.photo_names.map((url, index) => (
+                          <a key={url} href={url} target="_blank" rel="noopener noreferrer" className="text-link" style={{ display: "block" }}>
+                            View private condition photo {index + 1}
+                          </a>
+                        ))
+                      )}
                     </div>
                   )}
                 </article>
