@@ -44,6 +44,7 @@ export interface Booking {
 }
 export interface BookingEvent {
   id: string;
+  action?: string;
   booking_id: string;
   status: BookingStatus;
   at: string;
