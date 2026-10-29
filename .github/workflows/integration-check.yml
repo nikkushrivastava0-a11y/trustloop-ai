@@ -9,7 +9,7 @@ permissions:
 jobs:
   build-and-test:
     runs-on: ubuntu-latest
-    timeout-minutes: 12
+    timeout-minutes: 20
     env:
       NEXT_PUBLIC_SUPABASE_URL: https://zfwqgjkgfickspgptqaw.supabase.co
       NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY: ci-placeholder
@@ -23,3 +23,12 @@ jobs:
       - run: npm run lint
       - run: npm test
       - run: npm run build
+      - run: npx playwright install --with-deps chromium
+      - name: Build isolated demo mode for E2E
+        run: npm run build
+        env:
+          NEXT_PUBLIC_DEMO_MODE: "true"
+      - name: Browser lifecycle test (demo mode only)
+        run: npm run test:e2e
+        env:
+          NEXT_PUBLIC_DEMO_MODE: "true"
