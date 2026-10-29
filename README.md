@@ -12,8 +12,10 @@ Cameras, lab equipment, microphones, projectors and prototyping tools are expens
 - Resource listings, category filtering and full-text search
 - Explainable project-to-equipment matching (keyword/capability-based; **not** LLM-powered)
 - Booking requests and owner decisions: approve, reject, waitlist
-- Booking statuses, check-out and return confirmation
-- Written handover condition reports, incident history, audit trail
+- Booking statuses, owner-confirmed checkout and return using a student-issued opaque QR pass
+- Written handover condition reports and optional private condition photos, incident history, audit trail
+- Database-enforced non-overlapping approved bookings, two-active-booking fair-use limit, and first-in-line handling for overlapping waitlisted requests
+- Audited booking cancellation, periodic booking status refresh, overdue status indicators
 - Responsive frontend with light and dark mode
 - Database row-level security and server-side authorization for relevant actions
 
@@ -33,7 +35,7 @@ Test credentials are shared privately with judges where appropriate. Do not publ
 2. Describe a project in the resource match panel (it returns explainable, rules-based matches).
 3. Request an available resource for a future timeslot.
 4. Sign in as its owner and approve the request.
-5. Open the booking, record check-out condition notes, then record its return.
+5. Student opens an approved booking to show a private QR/pass. Owner enters that pass during handover, records notes and optionally uploads a condition photo (JPEG/PNG/WebP, up to 5 MB). Owner completes checkout and return.
 6. View history and condition evidence. The signed-in session and resource ownership determine what each account can do.
 
 ## Run locally
@@ -63,21 +65,31 @@ The resource match engine scores resource-title, category and description keywor
 ## Known limitations / honest scope
 
 - The resource matcher is **rules-based**, not generative AI.
-- Handover QR currently encodes booking ID, not a cryptographic proof; it should not be described as secure identity verification.
-- Live handovers store written notes; photo uploads to private storage are not yet implemented.
+- The handover QR contains a random per-booking secret issued to the student and verified by the owner on checkout/return. It is not identity proof, not a rotating token, and photographed or exposed passes can be replayed until the resource is returned.
+- Condition photos are stored in private Supabase Storage; access-controlled, time-limited signed links expose uploaded evidence to booking parties. A genuine photo of the equipment must be recorded for production-grade condition proof; generated demo images are only illustrative.
+- Live UI refreshes booking lists and history on window focus and approximately every 12 seconds; this is polling, not realtime push.
 - Owner/institution provisioning and training verification are still limited.
+- In-app approval/reminder notifications and automated overdue messaging are not complete (overdue labels exist).
+- Incident creation exists but full incident resolution/dispute workflow remains incomplete.
 - Need further concurrent booking, access-control and browser E2E testing before production use.
 - Availability must be verified by owner approval; displayed slots may omit other students' private bookings.
 - Never enter confidential personal data into demo accounts.
 
 ## Suggested judging demonstration
 
-Show one complete workflow on the live URL and emphasize **measured** effects: one booking requested, approved, checked out and returned, with both condition reports saved. Discuss upcoming secure verification and fair allocation as roadmap rather than completed features.
+Show one complete workflow on the live URL and emphasize **observed** effects: a Canon DSLR demonstration booking was approved, checked out, returned, with both condition reports and private photo links shown in the booking history on 29 October 2026. Explain that additional waitlist concurrency, RLS, uploads and incident-resolution edge cases still require regression testing.
 
 ## Team workflow
 
-`feature/frontend` — UI work; `feature/integration` — tested merged application; `main` — final submission branch after checks. Do not merge frontend alone into main, as it may omit the live backend.
+`feature/frontend` — UI work; `feature/integration` — integration and deployment; `main` — judge-accessible submission branch after merge. Check whether deployment Git source tracks a non-main branch before changing production configuration. Do not merge frontend alone into main, as it may omit the live backend.
 
 ## AI-tool disclosure
 
 If required by hackathon rules, accurately disclose coding assistants and any AI services used during development. The application resource matching in this repo is currently an explainable deterministic algorithm.
+
+## Data and pre-existing asset disclosure
+
+- The seven sample resources, sample booking purpose and example condition imagery are **fictional hackathon demonstration data**, not verified live institutional inventory or evidence of actual damage.
+- Framework/library components include Next.js, React, TypeScript, Supabase, the QR code library and existing open-source packages as listed in `package.json`.
+- Project source incorporates teammate frontend work and backend integration developed during this event. Review individual commit history to allocate author-specific credit accurately.
+- See `docs/JUDGE_TESTING.md` for step-by-step role-separated validation and scope disclosures.
