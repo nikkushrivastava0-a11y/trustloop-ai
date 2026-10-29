@@ -13,6 +13,14 @@ export async function POST(request: Request) {
   const db = await createClient();
   const { data: { user } } = await db.auth.getUser();
   if (!user) return NextResponse.json({ error: "Sign in required" }, { status: 401 });
+  // Explicit server-side owner gate. The resource RLS policy is a second boundary.
+  // Existing institution demo owners may have been provisioned with inventory.
+  const [{ data: profile }, { data: existingInventory }] = await Promise.all([
+    db.from("profiles").select("role").eq("id", user.id).maybeSingle(),
+    db.from("resources").select("id").eq("owner_id", user.id).limit(1),
+  ]);
+  if (profile?.role !== "owner" && profile?.role !== "manager" && !existingInventory?.length)
+    return NextResponse.json({ error: "Verified resource owner access required" }, { status: 403 });
   let body: Record<string, unknown>;
   try { body = await request.json(); } catch { return NextResponse.json({ error: "Invalid JSON" }, { status: 400 }); }
   const title = typeof body.title === "string" ? body.title.trim() : "";
