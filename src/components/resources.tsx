@@ -16,7 +16,20 @@ export function ResourceArt({
   resource: Resource;
   large?: boolean;
 }) {
-  const p = presentation[resource.id];
+  // Database UUIDs have no entry in fixture-based presentation assets.
+  // Resolve live inventory by category; use bundled illustrations rather than
+  // remote image services, so cards render consistently for judges.
+  const fallbackByCategory: Record<string, { image: string; label: string; accent: string }> = {
+    camera: { image: "/equipment/camera.svg", label: "Capture the moment", accent: "peach" },
+    photography: { image: "/equipment/camera.svg", label: "Capture the moment", accent: "peach" },
+    fabrication: { image: "/equipment/printer.svg", label: "Make it real", accent: "sage" },
+    audio: { image: "/equipment/audio.svg", label: "Every voice counts", accent: "rose" },
+    presentation: { image: "/equipment/projector.svg", label: "Share your big idea", accent: "sand" },
+    electronics: { image: "/equipment/arduino.svg", label: "Experiment and invent", accent: "blue" },
+    spaces: { image: "/equipment/meeting-room.svg", label: "Room to collaborate", accent: "sage" },
+    computers: { image: "/equipment/laptop.svg", label: "Power your next project", accent: "lavender" },
+  };
+  const p = presentation[resource.id] || fallbackByCategory[resource.category.toLowerCase()];
   return (
     <div
       className={`resource-art ${p?.accent || "sage"} ${large ? "large" : ""}`}
