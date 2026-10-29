@@ -115,8 +115,8 @@ export const api = {
     save(d);
     return booking;
   },
-  async updateStatus(id: string, status: BookingStatus): Promise<Booking> {
-    if (base) return realApi.updateStatus(id, status);
+  async updateStatus(id: string, status: BookingStatus, reason?: string): Promise<Booking> {
+    if (base) return realApi.updateStatus(id, status, reason);
     const d = read(),
       booking = d.bookings.find((b) => b.id === id);
     if (!booking) throw new Error("Booking not found.");
@@ -133,7 +133,7 @@ export const api = {
       booking_id: id,
       status,
       at: new Date().toISOString(),
-      note: `Booking ${status.replaceAll("_", " ")}`,
+      note: reason ? `${status.replaceAll("_", " ")}: ${reason}` : `Booking ${status.replaceAll("_", " ")}`,
     });
     save(d);
     return booking;
