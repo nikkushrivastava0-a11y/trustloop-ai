@@ -12,7 +12,7 @@ Two authenticated accounts are required: an existing **student** account and a p
 Open a regular browser window as student and a private/incognito window as owner. Date/time slots must start in the future. Use distinct, non-overlapping timeslots; booking duration is limited to seven days.
 
 ## Full user journey
-1. Student: browse **Discover resources**. Explore seven sample categories, search by use case; camera is recommended for film/documentary language. The resource page first tries experimental Gemini 2.5 Flash recommendations via the authenticated AI Gateway route, falling back to deterministic matching if unavailable; no autonomous booking decisions.
+1. Student: browse **Discover resources**. Explore seven sample categories, search by use case; camera is recommended for film/documentary language. Resource recommendations are deterministic keyword/capability matches with explainable reasons, without a paid LLM API or autonomous booking decisions.
 2. Student: select **Canon DSLR Camera — Demo**, submit a future booking request with a sample project purpose. Status: **Requested**.
 3. Owner: open **Owner workspace**, approve the request; status becomes **Approved**. Test **Waitlist** and **Reject** on separate requests. An older overlapping waitlisted request has priority.
 4. Student: open **My bookings → booking → Check out resource** and display the **student handover pass** (QR containing an opaque, per-booking random value). Keep this pass private.
@@ -38,7 +38,7 @@ On 29 October 2026 a test Canon DSLR booking was visibly approved, checked out a
 
 ## Limitations and disclosures
 - Fictional resources, synthetic demo notes and generated illustrative image assets; not authentic asset condition evidence.
-- Experimental Gemini 2.5 Flash resource matching was added 29 October 2026. Its live inference still requires a successful logged-in demo. It is optional and falls back to the deterministic keyword/capability algorithm; it is **not** an autonomous agent, RAG pipeline or booking decision-maker.
+- The deployed resource matcher is a deterministic keyword/capability algorithm, **not** an autonomous agent, RAG pipeline, generative AI model or booking decision-maker.
 - Owner account provisioning, granular resource-specific training certificates, physical identity checks, revocation/rotation of exposed passes, incident resolution, and instant notifications remain areas for improvement.
 - This is a hackathon prototype, not approved for unsupervised lending of hazardous or restricted equipment.
 - AI coding assistants, open-source libraries/frameworks, existing assets/templates and each member's exact contributions must be disclosed in the final form. Keep those details accurate to development history.
