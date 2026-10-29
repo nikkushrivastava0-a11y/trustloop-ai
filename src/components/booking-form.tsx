@@ -3,6 +3,7 @@ import Link from "next/link";
 import { useEffect, useState } from "react";
 import { api } from "@/lib/api";
 import { eligible } from "@/lib/domain";
+import { useCurrentTime } from "@/lib/use-current-time";
 import type { Resource } from "@/lib/types";
 import { Shell } from "./shell";
 import { Guard } from "./guard";
@@ -20,6 +21,7 @@ export function BookingForm({ resourceId }: { resourceId: string }) {
 }
 function BookingFields({ resourceId }: { resourceId: string }) {
   const { user } = useSession();
+  const now = useCurrentTime();
   const [resource, setResource] = useState<Resource>();
   const [loading, setLoading] = useState(true);
   const [starts, setStarts] = useState("");
@@ -53,7 +55,7 @@ function BookingFields({ resourceId }: { resourceId: string }) {
   const endMs = Date.parse(ends);
   const bookingWindowValid =
     Number.isFinite(startMs) && Number.isFinite(endMs) &&
-    startMs > Date.now() && endMs > startMs &&
+    now > 0 && startMs > now && endMs > startMs &&
     endMs - startMs <= 7 * 24 * 60 * 60 * 1000;
   if (loading) return <div className="skeleton" />;
   if (!resource)
