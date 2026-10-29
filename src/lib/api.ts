@@ -163,8 +163,9 @@ export const api = {
     notes: string,
     photos: File[],
     code?: string,
+    incidentKind: "damage" | "delay" | "conflict" | "other" = "other",
   ): Promise<ConditionReport> {
-    if (base) return realApi.report(id, kind, notes, photos, code);
+    if (base) return realApi.report(id, kind, notes, photos, code, incidentKind);
     const d = read(),
       b = d.bookings.find((b) => b.id === id);
     if (!b) throw new Error("Booking not found.");
@@ -184,7 +185,7 @@ export const api = {
       id: crypto.randomUUID(),
       booking_id: id,
       kind,
-      notes,
+      notes: kind === "incident" ? `${incidentKind.toUpperCase()}: ${notes}` : notes,
       photo_names: photos.map((f) => f.name),
       created_at: new Date().toISOString(),
     };
