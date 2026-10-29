@@ -35,7 +35,12 @@ export function BookingCard({
             {resource?.title || "Campus resource"}
           </h3>
         </div>
-        <Status status={booking.status} />
+        <div style={{ display: "flex", flexDirection: "column", alignItems: "flex-end", gap: 6 }}>
+          <Status status={booking.status} />
+          {booking.status === "checked_out" && new Date(booking.ends_at).getTime() < Date.now() && (
+            <span className="status rejected" role="status">Overdue · owner follow-up needed</span>
+          )}
+        </div>
       </div>
       <div className="booking-meta">
         <span>
