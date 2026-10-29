@@ -97,9 +97,6 @@ export function Discover() {
   const [query, setQuery] = useState("");
   const [projectNeed, setProjectNeed] = useState("");
   const [showMatches, setShowMatches] = useState(false);
-  const [aiLoading, setAiLoading] = useState(false);
-  const [aiSuggestions, setAiSuggestions] = useState<{ id: string; reason: string }[] | null>(null);
-  const [aiError, setAiError] = useState("");
   const [category, setCategory] = useState("All resources");
   const [available, setAvailable] = useState(false);
   const [training, setTraining] = useState(false);
@@ -135,17 +132,9 @@ export function Discover() {
       active = false;
     };
   }, []);
-  const rulesMatches = showMatches && projectNeed.trim().length >= 3
+  const matches = showMatches && projectNeed.trim().length >= 3
     ? matchResources(projectNeed, items, user?.trained_resource_ids || []).slice(0, 3)
     : [];
-  const matches = aiSuggestions === null
-    ? rulesMatches
-    : aiSuggestions.flatMap(s => {
-        const resource = items.find(r => r.id === s.id);
-        if (!resource) return [];
-        const bookable = resource.available && (!resource.requires_training || !!user?.trained_resource_ids.includes(resource.id));
-        return [{ resource, reasons: [s.reason, !resource.available ? "Currently unavailable" : !bookable ? "Training verification required" : "Availability and eligibility still checked during booking"], bookable }];
-      });
   const categories = [
     "All resources",
     ...new Set(items.map((r) => r.category)),
@@ -269,24 +258,21 @@ export function Discover() {
         <div className="eyebrow green">EXPLAINABLE RESOURCE MATCHING</div>
         <h2 id="smart-match-heading" style={{ marginTop: 10 }}>Tell us what you're building.</h2>
         <p>Describe your project to find fitting equipment, with availability and training requirements shown upfront.</p>
-        <form onSubmit={async (event) => { event.preventDefault(); setShowMatches(true); setAiSuggestions(null); setAiError(""); if (!user || projectNeed.trim().length < 8) return; setAiLoading(true); try { const response = await fetch("/api/ai/match", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ need: projectNeed.trim() }) }); const data = await response.json(); if (!response.ok) throw new Error(data.error || "LLM unavailable"); setAiSuggestions(data.suggestions); } catch (error) { setAiError(`${error instanceof Error ? error.message : "Live AI is currently unavailable"}. Showing keyword-based matches instead.`); } finally { setAiLoading(false); } }} style={{ display: "flex", flexWrap: "wrap", gap: 12, marginTop: 16 }}>
+        <form onSubmit={(event) => { event.preventDefault(); setShowMatches(true); }} style={{ display: "flex", flexWrap: "wrap", gap: 12, marginTop: 16 }}>
           <input
             aria-label="Describe your project for resource matching"
             value={projectNeed}
             maxLength={300}
-            onChange={(event) => { setProjectNeed(event.target.value); setShowMatches(false); setAiSuggestions(null); setAiError(""); }}
+            onChange={(event) => { setProjectNeed(event.target.value); setShowMatches(false); }}
             placeholder="e.g. I want to record a documentary or build a 3D prototype"
             style={{ flex: "1 1 280px", minWidth: 0 }}
             required
             minLength={3}
           />
-          <button type="submit" className="button" disabled={aiLoading}>{aiLoading ? "Finding with AI…" : "Find matching tools"}</button>
+          <button type="submit" className="button">Find matching tools</button>
         </form>
         {showMatches && (
           <div aria-live="polite" style={{ marginTop: 16 }}>
-            {aiLoading && <p role="status">Checking project needs against campus inventory…</p>}
-            {aiError && <p role="status">{aiError}</p>}
-            {aiSuggestions !== null && <p role="status">AI-assisted suggestions (experimental). Eligibility and bookings are checked separately.</p>}
             {matches.length ? (
               <div className="resource-grid">
                 {matches.map(({ resource, reasons, bookable }) => (
@@ -301,7 +287,7 @@ export function Discover() {
                 ))}
               </div>
             ) : <p role="status">No strong matches yet. Browse the full collection below or try a different description.</p>}
-            <small>{aiSuggestions !== null ? "Recommendations generated using an LLM over existing inventory. The model cannot change reservations, stock or access rights." : "Fallback: explainable keyword and capability matching over listed resources. No generative AI in fallback mode."}</small>
+            <small>How it works: explainable keyword and capability matching. No paid AI service is required.</small>
           </div>
         )}
       </section>
