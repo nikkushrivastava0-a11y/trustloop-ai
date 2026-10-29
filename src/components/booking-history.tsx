@@ -114,7 +114,7 @@ function History({ id }: { id: string }) {
                 {events.map((e) => (
                   <div className="timeline-item" key={e.id}>
                     <small>{formatDate(e.at)}</small>
-                    <Status status={e.status} />
+                    {e.action === "incident_reported" ? <span className="status">Incident reported</span> : <Status status={e.status} />}
                     <p>{e.note}</p>
                   </div>
                 ))}
