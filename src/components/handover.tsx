@@ -31,7 +31,7 @@ function BookingQR({ value }: { value: string }) {
         <canvas
           ref={ref}
           role="img"
-          aria-label={`QR code for booking ${value}`}
+          aria-label="Private student handover pass QR code"
         />
       )}
     </div>
