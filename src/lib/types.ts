@@ -57,6 +57,7 @@ export interface ConditionReport {
   notes: string;
   photo_names: string[];
   created_at: string;
+  resolution?: string | null;
 }
 export type BookingInput = Pick<
   Booking,
