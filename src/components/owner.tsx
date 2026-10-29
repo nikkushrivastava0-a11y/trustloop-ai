@@ -18,6 +18,7 @@ export function Owner() {
   );
 }
 function OwnerWorkspace() {
+  const { user } = useSession();
   const [bookings, setBookings] = useState<Booking[]>([]);
   const [resources, setResources] = useState<Resource[]>([]);
   const [loading, setLoading] = useState(true);
@@ -87,6 +88,7 @@ function OwnerWorkspace() {
       setBusy("");
     }
   }
+  const ownedResources = isDemo ? resources : resources.filter((resource) => resource.owner_id === user?.id);
   const pending = bookings.filter((b) =>
     ["requested", "waitlisted"].includes(b.status),
   );
@@ -143,7 +145,7 @@ function OwnerWorkspace() {
             <Icon name="box" />
           </span>
           <div>
-            <strong>{resources.length}</strong>
+            <strong>{ownedResources.length}</strong>
             <span>Shared resources</span>
           </div>
         </div>
@@ -198,7 +200,7 @@ function OwnerWorkspace() {
         <div className="skeleton" />
       ) : tab === "resources" ? (
         <div className="stack">
-          {resources.map((r) => (
+          {ownedResources.map((r) => (
             <article className="panel" key={r.id}>
               <div className="booking-card-header">
                 <div>
