@@ -99,8 +99,7 @@ export function ResourceDetail({ id }: { id: string }) {
             <div className="panel">
               <h2>Booking availability</h2>
               <p>
-                Choose a future start and end time. Confirmed reservations below
-                are unavailable; the server validates your request again.
+                Choose a future time range. For privacy, this view only shows bookings accessible to your account. Other students’ bookings may not appear here. The owner checks all time conflicts before approval.
               </p>
               {slots.length ? (
                 <div className="stack" style={{ marginTop: 16 }}>
@@ -113,8 +112,7 @@ export function ResourceDetail({ id }: { id: string }) {
                 </div>
               ) : (
                 <p style={{ marginTop: 15 }}>
-                  No confirmed reservations. Pick a time that works for your
-                  project.
+                  No confirmed reservations visible to your account. This does not guarantee the requested timeslot is free; the owner will verify availability.
                 </p>
               )}
             </div>
@@ -146,7 +144,7 @@ export function ResourceDetail({ id }: { id: string }) {
                     ? eligible(resource, user)
                       ? "Your training is verified."
                       : "Ask the resource owner to verify your training."
-                    : "Your campus account is all you need."}
+                    : "No special training is listed, but the owner must still approve your request."}
                 </p>
               </div>
             </div>
