@@ -99,11 +99,11 @@ export const realApi = {
     const row = await request<DBBooking>("/bookings", { method: "POST", body: JSON.stringify(input) });
     return bookingFromDB(row);
   },
-  async updateStatus(id: string, status: BookingStatus): Promise<Booking> {
+  async updateStatus(id: string, status: BookingStatus, reason?: string): Promise<Booking> {
     if (!["approved","rejected","waitlisted","cancelled"].includes(status))
       throw new Error("This action is not yet supported in live mode.");
     const row = await request<DBBooking>(status === "cancelled" ? "/bookings/cancel" : "/bookings/review", {
-      method: "POST", body: JSON.stringify(status === "cancelled" ? { booking_id: id } : { booking_id: id, decision: status })
+      method: "POST", body: JSON.stringify(status === "cancelled" ? { booking_id: id } : { booking_id: id, decision: status, reason: reason || undefined })
     });
     return bookingFromDB(row);
   },
