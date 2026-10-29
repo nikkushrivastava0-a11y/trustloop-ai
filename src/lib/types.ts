@@ -18,6 +18,7 @@ export interface User {
 }
 export interface Resource {
   id: string;
+  owner_id?: string;
   title: string;
   category: string;
   description: string;
