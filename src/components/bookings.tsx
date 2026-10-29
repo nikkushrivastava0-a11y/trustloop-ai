@@ -79,6 +79,7 @@ function BookingList() {
   const [error, setError] = useState("");
   const [filter, setFilter] = useState("all");
   const [busy, setBusy] = useState("");
+  const [cancelReasons, setCancelReasons] = useState<Record<string, string>>({});
   async function load() {
     setLoading(true);
     try {
@@ -181,6 +182,14 @@ function BookingList() {
               booking={b}
               resource={resources.find((r) => r.id === b.resource_id)}
             >
+              {["requested", "waitlisted", "approved"].includes(b.status) && (
+                <label className="field" style={{marginTop: 12}}>
+                  Cancellation reason (optional, recorded in history)
+                  <input maxLength={500} value={cancelReasons[b.id] || ""}
+                    onChange={e=>setCancelReasons(previous=>({...previous,[b.id]:e.target.value}))}
+                    placeholder="e.g. Project date changed" />
+                </label>
+              )}
               <div className="action-row">
                 <Link
                   href={`/bookings/${b.id}`}
@@ -208,6 +217,7 @@ function BookingList() {
                         const updated = await api.updateStatus(
                           b.id,
                           "cancelled",
+                          cancelReasons[b.id]?.trim(),
                         );
                         setBookings((all) =>
                           all.map((item) =>
