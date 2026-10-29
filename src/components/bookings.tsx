@@ -94,22 +94,33 @@ function BookingList() {
   }
   useEffect(() => {
     let active = true;
-    Promise.all([api.bookings(), api.resources()])
-      .then(([b, r]) => {
+    let fetching = false;
+    async function refresh() {
+      if (!active || fetching || document.hidden) return;
+      fetching = true;
+      try {
+        const [b, r] = await Promise.all([api.bookings(), api.resources()]);
         if (active) {
           setBookings(b);
           setResources(r);
-          setLoading(false);
+          setError("");
         }
-      })
-      .catch((e) => {
-        if (active) {
-          setError(e.message);
-          setLoading(false);
-        }
-      });
+      } catch (e) {
+        if (active) setError((e as Error).message);
+      } finally {
+        fetching = false;
+        if (active) setLoading(false);
+      }
+    }
+    void refresh();
+    const timer = window.setInterval(() => void refresh(), 12000);
+    document.addEventListener("visibilitychange", refresh);
+    window.addEventListener("focus", refresh);
     return () => {
       active = false;
+      window.clearInterval(timer);
+      document.removeEventListener("visibilitychange", refresh);
+      window.removeEventListener("focus", refresh);
     };
   }, []);
   const visible = bookings.filter(
