@@ -1,7 +1,8 @@
 "use client";
 import Link from "next/link";
 import { useEffect, useState } from "react";
-import { api } from "@/lib/api";
+import { api, isDemo } from "@/lib/api";
+import { useSession } from "./provider";
 import type { Booking, BookingStatus, Resource } from "@/lib/types";
 import { Shell } from "./shell";
 import { Guard } from "./guard";
