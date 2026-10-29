@@ -156,7 +156,7 @@ function HandoverForm({ id, incident }: { id: string; incident: boolean }) {
         <div className="detail-grid">
           <div className="stack">
             <BookingCard booking={booking} resource={resource} />
-            {(incident || !isRequester || isDemo) ? (
+            {(incident || !isRequester) ? (
             <form
               className="panel"
               onSubmit={async (e) => {
@@ -280,7 +280,7 @@ function HandoverForm({ id, incident }: { id: string; incident: boolean }) {
               )}
               <button
                 className="button full"
-                disabled={busy || !confirmed || !allowed || (isRequester && !incident && !isDemo)}
+                disabled={busy || !confirmed || !allowed || (isRequester && !incident)}
               >
                 {busy
                   ? "Submitting…"
