@@ -3,6 +3,8 @@ import Link from "next/link";
 import { useEffect, useRef, useState } from "react";
 import QRCode from "qrcode";
 import { api, isDemo } from "@/lib/api";
+import { realApi } from "@/lib/real-api";
+import { useSession } from "./provider";
 import type { Booking, ConditionReport, Resource } from "@/lib/types";
 import { Shell } from "./shell";
 import { Guard } from "./guard";
@@ -45,6 +47,9 @@ export function Handover({ id, incident }: { id: string; incident: boolean }) {
   );
 }
 function HandoverForm({ id, incident }: { id: string; incident: boolean }) {
+  const { user } = useSession();
+  const [handoverPass, setHandoverPass] = useState("");
+  const [passError, setPassError] = useState("");
   const [booking, setBooking] = useState<Booking>();
   const [resource, setResource] = useState<Resource>();
   const [loading, setLoading] = useState(true);
@@ -76,6 +81,21 @@ function HandoverForm({ id, incident }: { id: string; incident: boolean }) {
       active = false;
     };
   }, [id]);
+  const isRequester = !!user && booking?.student_id === user.id;
+  useEffect(() => {
+    if (incident || !booking || !isRequester || !["approved","checked_out"].includes(booking.status)) return;
+    if (isDemo) {
+      setHandoverPass(id);
+      return;
+    }
+    let active = true;
+    realApi.handoverPass(id).then((pass) => {
+      if (active) setHandoverPass(pass);
+    }).catch((e: Error) => {
+      if (active) setPassError(e.message);
+    });
+    return () => { active = false; };
+  }, [booking, id, incident, isRequester]);
   const kind: ConditionReport["kind"] = incident
     ? "incident"
     : booking?.status === "approved"
@@ -179,7 +199,7 @@ function HandoverForm({ id, incident }: { id: string; incident: boolean }) {
               )}
               {!incident && (
                 <label className="field">
-                  Booking / handover code
+                  Student handover pass
                   <input
                     required
                     value={code}
@@ -188,8 +208,7 @@ function HandoverForm({ id, incident }: { id: string; incident: boolean }) {
                     autoComplete="off"
                   />
                   <small>
-                    Scan with your phone’s QR reader, then enter the booking
-                    code shown.
+                    Ask the student to show their handover pass. Only the resource owner can confirm this handover.
                   </small>
                 </label>
               )}
@@ -276,11 +295,20 @@ function HandoverForm({ id, incident }: { id: string; incident: boolean }) {
             </p>
             {!incident && (
               <>
-                <BookingQR value={id} />
-                <div style={{ textAlign: "center" }}>
-                  <div className="eyebrow">BOOKING CODE</div>
-                  <strong>{id}</strong>
-                </div>
+                {isRequester && handoverPass ? (
+                  <>
+                    <BookingQR value={handoverPass} />
+                    <div style={{ textAlign: "center", overflowWrap: "anywhere" }}>
+                      <div className="eyebrow">STUDENT HANDOVER PASS</div>
+                      <strong>{handoverPass}</strong>
+                    </div>
+                    <p className="notice">Share this one-booking pass with the resource owner at physical pickup or return. Do not send it publicly.</p>
+                  </>
+                ) : isRequester ? (
+                  <p className="notice" role="status">{passError || "Loading your secure handover pass…"}</p>
+                ) : (
+                  <p className="notice">Only the student can display the secure QR pass. Ask them to show their pass, then enter that code in the owner confirmation form.</p>
+                )}
                 <div className="notice" style={{ marginTop: 20 }}>
                   Bring your campus ID and show this pass to the resource owner.
                   Confirm the equipment condition together before completing the
