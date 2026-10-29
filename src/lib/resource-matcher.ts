@@ -13,8 +13,9 @@ const synonyms: Record<string, string[]> = {
   presentation: ["projector", "screen", "slides", "display"],
   immersive: ["vr", "virtual", "quest", "headset", "mixed"],
 };
+const stopwords = new Set(["the", "and", "for", "with", "this", "that", "have", "want", "need", "will", "from", "into", "about", "final", "class", "project", "using", "able", "make", "your", "you", "are", "our", "can", "recording", "some", "all", "just", "like", "then", "here", "where"]);
 const tokens = (value: string) =>
-  value.toLowerCase().match(/[a-z0-9]+/g)?.filter((t) => t.length > 2) ?? [];
+  value.toLowerCase().match(/[a-z0-9]+/g)?.filter((t) => t.length > 2 && !stopwords.has(t)) ?? [];
 
 export interface ResourceMatch {
   resource: Resource;
