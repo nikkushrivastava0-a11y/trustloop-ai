@@ -110,7 +110,7 @@ export const realApi = {
   async history(id: string): Promise<{events: BookingEvent[]; reports: ConditionReport[]}> {
     const data = await request<{
       events: {id: number; action: string; created_at: string; details: Record<string, unknown>}[];
-      reports: {id:string;booking_id:string;stage:"checkout"|"return";notes:string;created_at:string}[];
+      reports: {id:string;booking_id:string;stage:"checkout"|"return";notes:string;photo_url:string|null;created_at:string}[];
       incidents: {id:string;booking_id:string;kind:string;details:string;created_at:string}[];
     }>("/bookings/history?booking_id=" + encodeURIComponent(id));
     const events = data.events.map(e => ({
@@ -119,6 +119,7 @@ export const realApi = {
         ? e.action : e.action === "checkout" ? "checked_out" : e.action === "return" ? "returned" : "requested") as BookingStatus,
       at: e.created_at, note: typeof e.details?.reason === "string" && e.details.reason.trim() ? `${e.action.replaceAll("_"," ")}: ${e.details.reason}` : e.action.replaceAll("_"," ")
     }));
+    const db = client();
     const reports: ConditionReport[] = [
       ...data.reports.map(r => ({
         id:r.id,booking_id:r.booking_id,kind:r.stage,notes:r.notes,photo_names:[],created_at:r.created_at
@@ -128,6 +129,12 @@ export const realApi = {
         notes:r.details,photo_names:[],created_at:r.created_at
       }))
     ];
+    for (const report of data.reports) {
+      if (!report.photo_url) continue;
+      const { data: signed } = await db.storage.from("trustloop-conditions").createSignedUrl(report.photo_url, 3600);
+      const matching = reports.find((item) => item.id === report.id);
+      if (matching && signed?.signedUrl) matching.photo_names = [signed.signedUrl];
+    }
     return { events, reports };
   },
   async handoverPass(id: string): Promise<string> {
@@ -137,7 +144,8 @@ export const realApi = {
     return String(data);
   },
   async report(id: string, kind: ConditionReport["kind"], notes: string, photos: File[], code?: string): Promise<ConditionReport> {
-    if (photos.length) throw new Error("Photo uploads are not yet supported in live mode. Remove files and record detailed condition notes.");
+    if (kind === "incident" && photos.length) throw new Error("Incident photo upload is not yet supported. Include details in the incident notes.");
+    if (photos.length > 1) throw new Error("Upload one condition photo per handover.");
     if (kind !== "incident" && !code)
       throw new Error("Enter the student handover pass shown by the requester.");
     const now = new Date().toISOString();
@@ -147,7 +155,23 @@ export const realApi = {
       });
       return {id:result.id,booking_id:id,kind,notes,photo_names:[],created_at:result.created_at};
     }
-    await request("/bookings/handover", {method:"POST",body:JSON.stringify({booking_id:id,stage:kind,notes,passcode:code})});
-    return {id:crypto.randomUUID(),booking_id:id,kind,notes,photo_names:[],created_at:now};
+    let photoUrl: string | null = null;
+    if (photos.length) {
+      const photo = photos[0];
+      if (!["image/jpeg","image/png","image/webp"].includes(photo.type) || photo.size > 5 * 1024 * 1024)
+        throw new Error("Choose a JPEG, PNG or WebP image under 5 MB.");
+      const ext = photo.type === "image/png" ? "png" : photo.type === "image/webp" ? "webp" : "jpg";
+      photoUrl = `${id}/${crypto.randomUUID()}.${ext}`;
+      const { error: uploadError } = await client().storage.from("trustloop-conditions")
+        .upload(photoUrl, photo, { contentType: photo.type, upsert: false });
+      if (uploadError) throw new Error("Condition photo upload failed: " + uploadError.message);
+    }
+    try {
+      await request("/bookings/handover", {method:"POST",body:JSON.stringify({booking_id:id,stage:kind,notes,passcode:code,photo_url:photoUrl})});
+    } catch (error) {
+      if (photoUrl) await client().storage.from("trustloop-conditions").remove([photoUrl]).catch(() => {});
+      throw error;
+    }
+    return {id:crypto.randomUUID(),booking_id:id,kind,notes,photo_names:photos.map(p => p.name),created_at:now};
   }
 };
