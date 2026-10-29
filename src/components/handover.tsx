@@ -227,25 +227,21 @@ function HandoverForm({ id, incident }: { id: string; incident: boolean }) {
                   }
                 />
               </label>
-              {isDemo && <label className="field">
+              {<label className="field">
                 {incident
                   ? "Supporting photos (optional)"
                   : "Condition photos (required)"}
                 <input
                   type="file"
                   accept="image/*"
-                  multiple
-                  required={!incident}
+                  required={isDemo && !incident}
                   onChange={(e) => setPhotos(Array.from(e.target.files || []))}
                 />
                 <small>
-                  Images only · up to 5 MB each.{" "}
-                  {isDemo
-                    ? "Demo records filenames only; API mode uploads the original files."
-                    : ""}
+                  {isDemo ? "Demo records filenames only." : "Live handovers store one private JPEG, PNG or WebP image (maximum 5 MB). Incident photos are not supported."}
                 </small>
               </label>}
-              {!isDemo && <p className="notice">Live mode currently records written condition evidence only. Photo uploads are not yet stored; do not claim photo evidence.</p>}
+              {!isDemo && <p className="notice">Photo evidence is stored privately and is accessible only to the booking parties through temporary signed links.</p>}
               {photos.length > 0 && (
                 <div className="photo-list">
                   Selected: {photos.map((f) => f.name).join(", ")}
