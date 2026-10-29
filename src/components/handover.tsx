@@ -55,6 +55,7 @@ function HandoverForm({ id, incident }: { id: string; incident: boolean }) {
   const [loading, setLoading] = useState(true);
   const [code, setCode] = useState("");
   const [notes, setNotes] = useState("");
+  const [incidentKind, setIncidentKind] = useState<"damage" | "delay" | "conflict" | "other">("damage");
   const [photos, setPhotos] = useState<File[]>([]);
   const [error, setError] = useState("");
   const [busy, setBusy] = useState(false);
@@ -178,7 +179,7 @@ function HandoverForm({ id, incident }: { id: string; incident: boolean }) {
                     )
                   )
                     throw new Error("Choose image files under 5 MB each.");
-                  await api.report(id, kind, notes, photos, code);
+                  await api.report(id, kind, notes, photos, code, incidentKind);
                   setDone(true);
                 } catch (e) {
                   setError((e as Error).message);
@@ -190,7 +191,7 @@ function HandoverForm({ id, incident }: { id: string; incident: boolean }) {
               <h2>{incident ? "Incident details" : "Equipment condition"}</h2>
               <p>
                 {incident
-                  ? "Describe what happened and attach supporting photos."
+                  ? "Choose an issue type and describe what happened. The report will be recorded in the booking history."
                   : "Note any existing marks, missing accessories or damage before confirming."}
               </p>
               {isRequester && !incident && !isDemo && (
@@ -216,6 +217,14 @@ function HandoverForm({ id, incident }: { id: string; incident: boolean }) {
                   </small>
                 </label>
               )}
+              {incident && <label className="field">Issue category
+                <select value={incidentKind} onChange={e => setIncidentKind(e.target.value as "damage" | "delay" | "conflict" | "other")}>
+                  <option value="damage">Damage or missing parts</option>
+                  <option value="delay">Late return</option>
+                  <option value="conflict">Booking or access conflict</option>
+                  <option value="other">Other concern</option>
+                </select>
+              </label>}
               <label className="field">
                 {incident ? "What happened?" : "Condition notes"}
                 <textarea
@@ -245,7 +254,7 @@ function HandoverForm({ id, incident }: { id: string; incident: boolean }) {
                   {isDemo ? "Demo records filenames only." : "Live handovers store one private JPEG, PNG or WebP image (maximum 5 MB). Incident photos are not supported."}
                 </small>
               </label>}
-              {!isDemo && <p className="notice">Photo evidence is stored privately and is accessible only to the booking parties through temporary signed links.</p>}
+              {!isDemo && !incident && <p className="notice">Condition photos are stored privately and shared with booking parties through temporary signed links.</p>}
               {photos.length > 0 && (
                 <div className="photo-list">
                   Selected: {photos.map((f) => f.name).join(", ")}
