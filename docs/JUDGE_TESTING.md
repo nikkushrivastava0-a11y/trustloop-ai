@@ -19,7 +19,7 @@ Open a regular browser window as student and a private/incognito window as owner
 5. Owner: **Owner workspace → Manage handover**, enter the student's private pass, record initial condition notes, optionally attach one JPG/PNG/WebP photo under 5 MB, check confirmation, click **Confirm check-out**. Status: **Checked Out**.
 6. Owner: return with the same student pass, add final condition notes and optional condition photo, confirm return. Status: **Returned**. The pass is invalidated on return.
 7. Student and owner: inspect **View history** for approval, checkout, return and before/after condition reports. Photo evidence is privately stored and opened via temporary signed URLs.
-8. Optional: open **Report an incident** and submit a clearly labelled **fictional test incident**. Verify it appears among incident reports. Actual dispute resolution and notifications are not complete.
+8. Optional: open **Report an incident** and submit a clearly labelled **fictional test incident**. Verify it appears among incident reports. Resource owners can enter a written resolution for an incident from booking history; multi-party dispute appeals and automated notifications are not complete.
 
 ## Security/fairness tests
 - Resource owner is the only account authorised to approve/reject/waitlist and confirm physical handover.
