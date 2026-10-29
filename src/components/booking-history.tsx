@@ -13,6 +13,7 @@ import { Shell } from "./shell";
 import { Guard } from "./guard";
 import { BookingCard, Status } from "./bookings";
 import { Icon } from "./icons";
+import { useSession } from "./provider";
 export function BookingHistory({ id }: { id: string }) {
   return (
     <Shell>
@@ -23,6 +24,10 @@ export function BookingHistory({ id }: { id: string }) {
   );
 }
 function History({ id }: { id: string }) {
+  const { user } = useSession();
+  const [resolutions, setResolutions] = useState<Record<string,string>>({});
+  const [resolutionBusy, setResolutionBusy] = useState("");
+  const [resolutionError, setResolutionError] = useState("");
   const [booking, setBooking] = useState<Booking>();
   const [resource, setResource] = useState<Resource>();
   const [events, setEvents] = useState<BookingEvent[]>([]);
@@ -114,7 +119,7 @@ function History({ id }: { id: string }) {
                 {events.map((e) => (
                   <div className="timeline-item" key={e.id}>
                     <small>{formatDate(e.at)}</small>
-                    {e.action === "incident_reported" ? <span className="status">Incident reported</span> : <Status status={e.status} />}
+                    {e.action === "incident_reported" || e.action === "incident_resolved" ? <span className="status">{e.action === "incident_reported" ? "Incident reported" : "Incident resolved"}</span> : <Status status={e.status} />}
                     <p>{e.note}</p>
                   </div>
                 ))}
@@ -127,6 +132,7 @@ function History({ id }: { id: string }) {
           <aside className="panel">
             <h2>Condition & incident reports</h2>
             <p>Care is part of the borrowing experience.</p>
+            {resolutionError && <p role="alert" className="error">{resolutionError}</p>}
             {reports.length ? (
               reports.map((r) => (
                 <article className="report-card" key={r.id}>
@@ -134,6 +140,17 @@ function History({ id }: { id: string }) {
                     {r.kind} · {formatDate(r.created_at)}
                   </div>
                   <p>{r.notes}</p>
+                  {r.kind === "incident" && r.resolution && <p className="notice"><strong>Owner resolution:</strong> {r.resolution}</p>}
+                  {r.kind === "incident" && !r.resolution && !isDemo && resource?.owner_id === user?.id && <div className="field" style={{ marginTop: 12 }}>
+                    <label htmlFor={`resolution-${r.id}`}>Owner resolution / next steps</label>
+                    <textarea id={`resolution-${r.id}`} minLength={5} maxLength={2000} value={resolutions[r.id] || ""} onChange={e => setResolutions(v => ({...v,[r.id]:e.target.value}))} placeholder="Describe the action taken, agreement or next steps." />
+                    <button type="button" className="button secondary small" disabled={!!resolutionBusy || (resolutions[r.id] || "").trim().length < 5} onClick={async () => {
+                      setResolutionBusy(r.id); setResolutionError("");
+                      try { await api.resolveIncident(r.id, (resolutions[r.id] || "").trim()); window.location.reload(); }
+                      catch (e) { setResolutionError(e instanceof Error ? e.message : "Resolution failed"); }
+                      finally { setResolutionBusy(""); }
+                    }}>{resolutionBusy === r.id ? "Saving…" : "Record resolution"}</button>
+                  </div>}
                   {r.photo_names.length > 0 && (
                     <div className="photo-list">
                       {isDemo ? (
