@@ -114,7 +114,7 @@ export const realApi = {
       incidents: {id:string;booking_id:string;kind:string;details:string;created_at:string}[];
     }>("/bookings/history?booking_id=" + encodeURIComponent(id));
     const events = data.events.map(e => ({
-      id: String(e.id), booking_id: id,
+      id: String(e.id), booking_id: id, action: e.action,
       status: (["approved","rejected","waitlisted","checked_out","returned","cancelled"].includes(e.action)
         ? e.action : e.action === "checkout" ? "checked_out" : e.action === "return" ? "returned" : "requested") as BookingStatus,
       at: e.created_at, note: typeof e.details?.reason === "string" && e.details.reason.trim() ? `${e.action.replaceAll("_"," ")}: ${e.details.reason}` : e.action.replaceAll("_"," ")
