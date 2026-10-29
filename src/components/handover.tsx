@@ -85,10 +85,7 @@ function HandoverForm({ id, incident }: { id: string; incident: boolean }) {
   const isRequester = !!user && booking?.student_id === user.id;
   useEffect(() => {
     if (incident || !booking || !isRequester || !["approved","checked_out"].includes(booking.status)) return;
-    if (isDemo) {
-      setHandoverPass(id);
-      return;
-    }
+    if (isDemo) return;
     let active = true;
     realApi.handoverPass(id).then((pass) => {
       if (active) setHandoverPass(pass);
@@ -97,6 +94,7 @@ function HandoverForm({ id, incident }: { id: string; incident: boolean }) {
     });
     return () => { active = false; };
   }, [booking, id, incident, isRequester]);
+  const displayedHandoverPass = isDemo && isRequester ? id : handoverPass;
   const kind: ConditionReport["kind"] = incident
     ? "incident"
     : booking?.status === "approved"
@@ -312,12 +310,12 @@ function HandoverForm({ id, incident }: { id: string; incident: boolean }) {
             </p>
             {!incident && (
               <>
-                {isRequester && handoverPass ? (
+                {isRequester && displayedHandoverPass ? (
                   <>
-                    <BookingQR value={handoverPass} />
+                    <BookingQR value={displayedHandoverPass} />
                     <div style={{ textAlign: "center", overflowWrap: "anywhere" }}>
                       <div className="eyebrow">STUDENT HANDOVER PASS</div>
-                      <strong>{handoverPass}</strong>
+                      <strong>{displayedHandoverPass}</strong>
                     </div>
                     <p className="notice">Share this one-booking pass with the resource owner at physical pickup or return. Do not send it publicly.</p>
                   </>
