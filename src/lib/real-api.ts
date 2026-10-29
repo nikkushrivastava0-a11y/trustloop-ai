@@ -126,7 +126,7 @@ export const realApi = {
       })),
       ...data.incidents.map(r => ({
         id:r.id,booking_id:r.booking_id,kind:"incident" as const,
-        notes:r.details,photo_names:[],created_at:r.created_at
+        notes:`${r.kind.toUpperCase()}: ${r.details}`,photo_names:[],created_at:r.created_at
       }))
     ];
     for (const report of data.reports) {
@@ -143,7 +143,7 @@ export const realApi = {
     if (error) throw new Error(error.message);
     return String(data);
   },
-  async report(id: string, kind: ConditionReport["kind"], notes: string, photos: File[], code?: string): Promise<ConditionReport> {
+  async report(id: string, kind: ConditionReport["kind"], notes: string, photos: File[], code?: string, incidentKind: "damage" | "delay" | "conflict" | "other" = "other"): Promise<ConditionReport> {
     if (kind === "incident" && photos.length) throw new Error("Incident photo upload is not yet supported. Include details in the incident notes.");
     if (photos.length > 1) throw new Error("Upload one condition photo per handover.");
     if (kind !== "incident" && !code)
@@ -151,7 +151,7 @@ export const realApi = {
     const now = new Date().toISOString();
     if (kind === "incident") {
       const result = await request<{id:string;created_at:string}>("/bookings/incident", {
-        method:"POST", body:JSON.stringify({booking_id:id,kind:"other",details:notes})
+        method:"POST", body:JSON.stringify({booking_id:id,kind:incidentKind,details:notes})
       });
       return {id:result.id,booking_id:id,kind,notes,photo_names:[],created_at:result.created_at};
     }
