@@ -10,7 +10,7 @@ Cameras, lab equipment, microphones, projectors and prototyping tools are expens
 
 - Student and owner accounts with Supabase Auth
 - Resource listings, category filtering and full-text search
-- Explainable project-to-equipment matching (keyword/capability-based; **not** LLM-powered)
+- Experimental Gemini 2.5 Flash resource recommendations through a server-side Vercel AI Gateway endpoint, with explainable deterministic keyword/capability matching as fallback. The LLM never approves bookings.
 - Booking requests and owner decisions: approve, reject, waitlist
 - Booking statuses, owner-confirmed checkout and return using a student-issued opaque QR pass
 - Written handover condition reports and optional private condition photos, incident history, audit trail
@@ -60,11 +60,11 @@ The existing `npm run test:e2e` script exercises demo mode, **not** real Supabas
 
 Browser UI → Next.js API routes → Supabase Auth + PostgreSQL/RLS → booking review/handover functions and audit data.
 
-The resource match engine scores resource-title, category and description keyword overlap, expands a small set of related terms, and explains the results. It is deterministic and does not call an LLM.
+The optional authenticated `/api/ai/match` endpoint requests Gemini 2.5 Flash through Vercel AI Gateway (OIDC on Vercel or server-side AI_GATEWAY_API_KEY). Its constrained JSON result contains existing resource IDs and matching reasons, which are filtered against the live inventory before use. Fallback matching scores keyword overlap between titles, categories and descriptions and expands related terms. Neither path grants training eligibility, approves reservations or updates stored resources.
 
 ## Known limitations / honest scope
 
-- The resource matcher is **rules-based**, not generative AI.
+- The resource discovery screen offers **experimental LLM recommendations** via Gemini 2.5 Flash, subject to AI Gateway access, account credit and runtime availability. If the provider fails, rule-based matching remains available. The older matcher is still deterministic and never calls an LLM.
 - The handover QR contains a random per-booking secret issued to the student and verified by the owner on checkout/return. It is not identity proof, not a rotating token, and photographed or exposed passes can be replayed until the resource is returned.
 - Condition photos are stored in private Supabase Storage; access-controlled, time-limited signed links expose uploaded evidence to booking parties. A genuine photo of the equipment must be recorded for production-grade condition proof; generated demo images are only illustrative.
 - Live UI refreshes booking lists and history on window focus and approximately every 12 seconds; this is polling, not realtime push.
@@ -85,7 +85,7 @@ Show one complete workflow on the live URL and emphasize **observed** effects: a
 
 ## AI-tool disclosure
 
-If required by hackathon rules, accurately disclose coding assistants and any AI services used during development. The application resource matching in this repo is currently an explainable deterministic algorithm.
+If required by hackathon rules, accurately disclose coding assistants and any AI services used during development. The deployed code now includes an experimental LLM-based discovery option via Gemini 2.5 Flash on Vercel AI Gateway, with a deterministic rule-based fallback. Inference success still requires a live authenticated test; do not claim it is proven until it succeeds.
 
 ## Data and pre-existing asset disclosure
 
