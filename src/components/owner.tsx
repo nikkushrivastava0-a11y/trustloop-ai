@@ -25,6 +25,7 @@ function OwnerWorkspace() {
   const [error, setError] = useState("");
   const [message, setMessage] = useState("");
   const [busy, setBusy] = useState("");
+  const [decisionReasons, setDecisionReasons] = useState<Record<string, string>>({});
   const [tab, setTab] = useState("requests");
   const [showForm, setShowForm] = useState(false);
   const [queue, setQueue] = useState("pending");
@@ -77,7 +78,7 @@ function OwnerWorkspace() {
     setError("");
     setMessage("");
     try {
-      const updated = await api.updateStatus(id, status);
+      const updated = await api.updateStatus(id, status, decisionReasons[id]?.trim());
       setBookings((items) => items.map((b) => (b.id === id ? updated : b)));
       setMessage(
         `${id} ${status}. The student can track this update in booking history.`,
@@ -239,6 +240,14 @@ function OwnerWorkspace() {
               booking={b}
               resource={resources.find((r) => r.id === b.resource_id)}
             >
+              {["requested", "waitlisted"].includes(b.status) && (
+                <label className="field" style={{ marginTop: 12 }}>
+                  Decision reason (shown in the student audit history)
+                  <input maxLength={500} value={decisionReasons[b.id] || ""}
+                    onChange={e => setDecisionReasons(current => ({...current, [b.id]: e.target.value}))}
+                    placeholder="e.g. Equipment reserved for lab maintenance; try another day" />
+                </label>
+              )}
               <div className="action-row">
                 {["requested", "waitlisted"].includes(b.status) && (
                   <>
