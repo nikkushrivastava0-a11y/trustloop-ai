@@ -1,6 +1,6 @@
 "use client";
 import Link from "next/link";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { api } from "@/lib/api";
 import { formatDate } from "@/lib/domain";
 import {
@@ -80,6 +80,8 @@ function BookingList() {
   const [filter, setFilter] = useState("all");
   const [busy, setBusy] = useState("");
   const [cancelReasons, setCancelReasons] = useState<Record<string, string>>({});
+  const [statusNotice, setStatusNotice] = useState("");
+  const previousStatuses = useRef<Record<string, BookingStatus> | null>(null);
   async function load() {
     setLoading(true);
     try {
@@ -102,6 +104,12 @@ function BookingList() {
       try {
         const [b, r] = await Promise.all([api.bookings(), api.resources()]);
         if (active) {
+          const old = previousStatuses.current;
+          if (old) {
+            const change = b.find(item => old[item.id] && old[item.id] !== item.status);
+            if (change) setStatusNotice(`Booking ${change.id}: status changed to ${change.status.replaceAll("_", " ")}. Open the timeline for details.`);
+          }
+          previousStatuses.current = Object.fromEntries(b.map(item => [item.id, item.status]));
           setBookings(b);
           setResources(r);
           setError("");
@@ -154,6 +162,9 @@ function BookingList() {
         </div>
         <span className="count-label">{visible.length} bookings</span>
       </div>
+      {statusNotice && <div className="notice" role="status" aria-live="polite">
+        {statusNotice} <button type="button" className="button secondary small" onClick={() => setStatusNotice("")}>Dismiss</button>
+      </div>}
       {error && (
         <div className="error" role="alert">
           {error} <button onClick={() => void load()}>Retry</button>
