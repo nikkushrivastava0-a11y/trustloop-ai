@@ -192,6 +192,9 @@ function HandoverForm({ id, incident }: { id: string; incident: boolean }) {
                   ? "Describe what happened and attach supporting photos."
                   : "Note any existing marks, missing accessories or damage before confirming."}
               </p>
+              {isRequester && !incident && !isDemo && (
+                <p className="notice" style={{ marginTop: 16 }}>Your secure handover pass is shown on the right. The resource owner completes checkout and return confirmation with you.</p>
+              )}
               {!allowed && (
                 <p className="notice" style={{ marginTop: 16 }}>
                   Handovers require an approved or checked-out booking.
@@ -267,7 +270,7 @@ function HandoverForm({ id, incident }: { id: string; incident: boolean }) {
               )}
               <button
                 className="button full"
-                disabled={busy || !confirmed || !allowed}
+                disabled={busy || !confirmed || !allowed || (isRequester && !incident && !isDemo)}
               >
                 {busy
                   ? "Submitting…"
