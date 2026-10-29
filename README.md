@@ -54,7 +54,7 @@ npm test
 npm run build
 ```
 
-The existing `npm run test:e2e` script exercises demo mode, **not** real Supabase end-to-end access.
+The existing `npm run test:e2e` script exercises demo mode, **not** real Supabase end-to-end access. CI now separately builds production mode and isolated demo mode, then runs a Chromium booking/hand-over/incident-resolution browser test. A passing CI result must be confirmed in GitHub Actions.
 
 ## Architecture
 
@@ -70,7 +70,7 @@ The resource matcher scores keyword overlap between titles, categories and descr
 - Live UI refreshes booking lists and history on window focus and approximately every 12 seconds; this is polling, not realtime push.
 - Owner/institution provisioning and training verification are still limited.
 - My Bookings now shows an in-app status-change notice when polling detects an update (approximately every 12 seconds, when visible). Email/SMS/push notifications and automatic overdue reminders are not implemented.
-- Owners can record audited incident resolutions; multi-party disputes, appeals and escalation workflows remain incomplete.
+- Owners can record audited incident resolutions. The audit trigger uses a restricted owner-checking database function so a resource owner can write an audit event without granting clients general audit-log insert permissions. Multi-party disputes, appeals and escalation workflows remain incomplete.
 - Need further concurrent booking, access-control and browser E2E testing before production use.
 - Availability must be verified by owner approval; the resource page explicitly warns that other students' private bookings may not appear.
 - Never enter confidential personal data into demo accounts.
