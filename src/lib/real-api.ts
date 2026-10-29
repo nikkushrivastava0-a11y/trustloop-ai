@@ -117,7 +117,7 @@ export const realApi = {
       id: String(e.id), booking_id: id,
       status: (["approved","rejected","waitlisted","checked_out","returned","cancelled"].includes(e.action)
         ? e.action : e.action === "checkout" ? "checked_out" : e.action === "return" ? "returned" : "requested") as BookingStatus,
-      at: e.created_at, note: e.action.replaceAll("_"," ")
+      at: e.created_at, note: typeof e.details?.reason === "string" && e.details.reason.trim() ? `${e.action.replaceAll("_"," ")}: ${e.details.reason}` : e.action.replaceAll("_"," ")
     }));
     const reports: ConditionReport[] = [
       ...data.reports.map(r => ({
