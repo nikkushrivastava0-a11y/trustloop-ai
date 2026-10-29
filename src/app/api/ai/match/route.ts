@@ -45,7 +45,7 @@ export async function POST(request: Request) {
   if (!inventory.length) return NextResponse.json({ suggestions: [], source: "llm" });
 
   const bearer = process.env.AI_GATEWAY_API_KEY || process.env.VERCEL_OIDC_TOKEN;
-  if (!bearer) return NextResponse.json({ error: "AI Gateway is not configured" }, { status: 503 });
+  if (!bearer) return NextResponse.json({ error: "AI Gateway authentication is not configured (missing token)." }, { status: 503 });
 
   const controller = new AbortController();
   const timeout = setTimeout(() => controller.abort(), 12000);
@@ -65,14 +65,26 @@ export async function POST(request: Request) {
       }),
       cache: "no-store"
     });
-    if (!response.ok) return NextResponse.json({ error: "AI provider unavailable" }, { status: 503 });
+    if (!response.ok) {
+      const failure = await response.json().catch(() => ({})) as { error?: { code?: string; type?: string } };
+      const code = typeof failure.error?.code === "string" ? failure.error.code : typeof failure.error?.type === "string" ? failure.error.type : "provider_error";
+      console.error("AI Gateway request failed", { status: response.status, code });
+      const messages: Record<number, string> = {
+        401: "AI Gateway authentication failed (401).",
+        402: "AI Gateway credits or budget unavailable (402).",
+        403: "AI Gateway needs account or billing verification (403).",
+        429: "AI Gateway rate limit reached (429).",
+      };
+      return NextResponse.json({ error: messages[response.status] || `AI Gateway request failed (${response.status}, ${code.slice(0, 55)}).` }, { status: 503 });
+    }
     const payload = await response.json() as GatewayReply;
     const content = payload.choices?.[0]?.message?.content;
     const text = typeof content === "string" ? content : Array.isArray(content) ? content.map(x => x.text ?? "").join("") : "";
     const suggestions = parseSuggestions(text, allowed);
     return NextResponse.json({ suggestions, source: "llm", model: "google/gemini-2.5-flash" }, { headers: { "Cache-Control": "no-store" } });
-  } catch {
-    return NextResponse.json({ error: "AI recommendations unavailable" }, { status: 503 });
+  } catch (error) {
+    console.error("AI recommendation failed", error instanceof Error ? error.message : "unknown");
+    return NextResponse.json({ error: error instanceof Error && error.name === "AbortError" ? "AI request timed out after 12 seconds." : "AI response could not be processed." }, { status: 503 });
   } finally {
     clearTimeout(timeout);
   }
