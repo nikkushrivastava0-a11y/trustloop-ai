@@ -126,20 +126,31 @@ export function Discover() {
     "All resources",
     ...new Set(items.map((r) => r.category)),
   ];
-  const filtered = items
-    .filter(
-      (r) =>
-        (category === "All resources" || r.category === category) &&
-        (!available || r.available) &&
-        (!training || !r.requires_training) &&
-        `${r.title} ${r.category} ${r.description} ${r.location}`
-          .toLowerCase()
-          .includes(query.trim().toLowerCase()),
+  const phraseMatches = query.trim().length >= 3
+    ? matchResources(query, items, user?.trained_resource_ids || [])
+    : [];
+  const directMatches = items.filter((r) =>
+    `${r.title} ${r.category} ${r.description} ${r.location}`
+      .toLowerCase().includes(query.trim().toLowerCase())
+  );
+  // Natural language falls back to explainable capability matching.
+  // Keep simple keyword searches behaving exactly as before.
+  const candidateResources = query.trim() && directMatches.length === 0
+    ? phraseMatches.filter((match) => match.score >= 10).map((match) => match.resource)
+    : directMatches;
+  const isSmartSearch = query.trim().length >= 3 && directMatches.length === 0 && candidateResources.length > 0;
+  const filtered = candidateResources
+    .filter((r) =>
+      (category === "All resources" || r.category === category) &&
+      (!available || r.available) &&
+      (!training || !r.requires_training)
     )
     .sort((a, b) =>
       sort === "name"
         ? a.title.localeCompare(b.title)
-        : Number(b.available) - Number(a.available),
+        : isSmartSearch
+          ? phraseMatches.findIndex((m) => m.resource.id === a.id) - phraseMatches.findIndex((m) => m.resource.id === b.id)
+          : Number(b.available) - Number(a.available)
     );
   return (
     <Shell>
@@ -336,6 +347,12 @@ export function Discover() {
             </label>
           </div>
         </div>
+        {isSmartSearch && !loading && !error && (
+          <p className="notice" role="status" style={{ marginBottom: 16 }}>
+            Showing project-relevant equipment using keyword and capability matching.
+            This is an explainable search, not a generative AI response.
+          </p>
+        )}
         {loading ? (
           <div className="resource-grid" aria-label="Loading resources">
             {[1, 2, 3].map((n) => (
