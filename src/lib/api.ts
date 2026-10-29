@@ -181,6 +181,8 @@ export const api = {
     if (!b) throw new Error("Booking not found.");
     if (!d.user || (d.user.role !== "owner" && b.student_id !== d.user.id))
       throw new Error("You do not have permission for this booking.");
+    if (kind !== "incident" && d.user.role !== "owner")
+      throw new Error("Only resource owners can confirm check-out and return.");
     if (kind !== "incident") {
       if (code !== id)
         throw new Error("The handover code does not match this booking.");
@@ -200,6 +202,9 @@ export const api = {
       created_at: new Date().toISOString(),
     };
     d.reports.push(report);
+    if (kind === "incident") {
+      d.events.push({id:crypto.randomUUID(),booking_id:id,status:b.status,action:"incident_reported",at:report.created_at,note:"Incident reported: "+incidentKind});
+    }
     if (kind !== "incident") {
       b.status = kind === "checkout" ? "checked_out" : "returned";
       d.events.push({
