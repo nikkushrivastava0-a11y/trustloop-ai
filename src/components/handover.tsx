@@ -155,6 +155,7 @@ function HandoverForm({ id, incident }: { id: string; incident: boolean }) {
         <div className="detail-grid">
           <div className="stack">
             <BookingCard booking={booking} resource={resource} />
+            {(incident || !isRequester || isDemo) ? (
             <form
               className="panel"
               onSubmit={async (e) => {
@@ -282,10 +283,18 @@ function HandoverForm({ id, incident }: { id: string; incident: boolean }) {
                 <Icon name="check" size={16} />
               </button>
             </form>
+            ) : (
+              <section className="panel" aria-label="Student handover instructions">
+                <h2>Your handover pass is ready</h2>
+                <p>Show the QR code and private pass on the right to the resource owner. The owner will record the equipment condition and confirm checkout or return.</p>
+                <p className="notice" style={{ marginTop: 16 }}>Checkout is completed by the resource owner, not from the student account. Keep this page open while the owner confirms.</p>
+                <Link href={`/bookings/${id}`} className="button secondary" style={{ marginTop: 16 }}>View booking timeline</Link>
+              </section>
+            )}
           </div>
           <aside className="panel booking-panel">
             <h2>
-              {incident ? "Keep the loop informed." : "Your handover pass"}
+              {incident ? "Keep the loop informed." : isRequester ? "Your handover pass" : "Owner verification"}
             </h2>
             <p>
               {incident
