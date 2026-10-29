@@ -22,7 +22,8 @@ export async function POST(request: Request) {
     p_booking_id: body.booking_id,
     p_stage: body.stage,
     p_notes: body.notes.trim(),
-    p_photo_url: typeof body.photo_url === "string" ? body.photo_url : null
+    p_photo_url: typeof body.photo_url === "string" ? body.photo_url : null,
+    p_passcode: typeof body.passcode === "string" ? body.passcode : null
   });
   return error ? NextResponse.json({ error: error.message }, { status: 400 }) : NextResponse.json(data);
 }
