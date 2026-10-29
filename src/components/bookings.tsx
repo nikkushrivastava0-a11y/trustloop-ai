@@ -3,6 +3,7 @@ import Link from "next/link";
 import { useEffect, useRef, useState } from "react";
 import { api } from "@/lib/api";
 import { formatDate } from "@/lib/domain";
+import { useCurrentTime } from "@/lib/use-current-time";
 import {
   bookingStatuses,
   type Booking,
@@ -26,6 +27,7 @@ export function BookingCard({
   resource?: Resource;
   children?: React.ReactNode;
 }) {
+  const now = useCurrentTime();
   return (
     <article className="panel">
       <div className="booking-card-header">
@@ -37,7 +39,7 @@ export function BookingCard({
         </div>
         <div style={{ display: "flex", flexDirection: "column", alignItems: "flex-end", gap: 6 }}>
           <Status status={booking.status} />
-          {booking.status === "checked_out" && new Date(booking.ends_at).getTime() < Date.now() && (
+          {booking.status === "checked_out" && new Date(booking.ends_at).getTime() < now && (
             <span className="status rejected" role="status">Overdue · owner follow-up needed</span>
           )}
         </div>
