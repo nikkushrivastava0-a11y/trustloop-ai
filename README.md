@@ -69,10 +69,10 @@ The resource matcher scores keyword overlap between titles, categories and descr
 - Condition photos are stored in private Supabase Storage; access-controlled, time-limited signed links expose uploaded evidence to booking parties. A genuine photo of the equipment must be recorded for production-grade condition proof; generated demo images are only illustrative.
 - Live UI refreshes booking lists and history on window focus and approximately every 12 seconds; this is polling, not realtime push.
 - Owner/institution provisioning and training verification are still limited.
-- In-app approval/reminder notifications and automated overdue messaging are not complete (overdue labels exist).
+- My Bookings now shows an in-app status-change notice when polling detects an update (approximately every 12 seconds, when visible). Email/SMS/push notifications and automatic overdue reminders are not implemented.
 - Owners can record audited incident resolutions; multi-party disputes, appeals and escalation workflows remain incomplete.
 - Need further concurrent booking, access-control and browser E2E testing before production use.
-- Availability must be verified by owner approval; displayed slots may omit other students' private bookings.
+- Availability must be verified by owner approval; the resource page explicitly warns that other students' private bookings may not appear.
 - Never enter confidential personal data into demo accounts.
 
 ## Suggested judging demonstration
