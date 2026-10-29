@@ -1,7 +1,7 @@
 name: Integration checks
 on:
   push:
-    branches: [feature/integration]
+    branches: [main, feature/integration]
   pull_request:
     branches: [main]
 permissions:
