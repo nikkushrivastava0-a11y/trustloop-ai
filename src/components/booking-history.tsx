@@ -141,7 +141,7 @@ function History({ id }: { id: string }) {
                   </div>
                   <p>{r.notes}</p>
                   {r.kind === "incident" && r.resolution && <p className="notice"><strong>Owner resolution:</strong> {r.resolution}</p>}
-                  {r.kind === "incident" && !r.resolution && !isDemo && resource?.owner_id === user?.id && <div className="field" style={{ marginTop: 12 }}>
+                  {r.kind === "incident" && !r.resolution && (isDemo ? user?.role === "owner" : resource?.owner_id === user?.id) && <div className="field" style={{ marginTop: 12 }}>
                     <label htmlFor={`resolution-${r.id}`}>Owner resolution / next steps</label>
                     <textarea id={`resolution-${r.id}`} minLength={5} maxLength={2000} value={resolutions[r.id] || ""} onChange={e => setResolutions(v => ({...v,[r.id]:e.target.value}))} placeholder="Describe the action taken, agreement or next steps." />
                     <button type="button" className="button secondary small" disabled={!!resolutionBusy || (resolutions[r.id] || "").trim().length < 5} onClick={async () => {
