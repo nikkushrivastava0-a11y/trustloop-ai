@@ -28,8 +28,8 @@ Open a regular browser window as student and a private/incognito window as owner
 - Postgres exclusion constraint blocks overlapping **approved/checked_out** reservations for the same resource.
 - Database approval trigger limits each student to **two currently active approved/checked-out bookings**.
 - For overlapping waitlisted requests, the owner cannot approve a newer request before an older outstanding waitlisted request.
-- Owner/student may cancel pending or approved bookings before checkout, with an audit entry.
-- A training-required resource (sample 3D Printer) must not be approved without verified training.
+- Owner/student may cancel pending or approved bookings before checkout, with an optional written reason recorded in the audit history.
+- A training-required resource (sample 3D Printer) must not be approved without verified training. Booking purpose must contain at least 10 characters, enforced by the server.
 - Booking list, owner workspace and history poll every 12 seconds and refresh on tab focus; not websocket realtime.
 - Overdue checked-out bookings show an overdue badge; automated email/SMS reminder delivery is not implemented.
 
@@ -42,3 +42,7 @@ On 29 October 2026 a test Canon DSLR booking was visibly approved, checked out a
 - Owner account provisioning, granular resource-specific training certificates, physical identity checks, revocation/rotation of exposed passes, incident resolution, and instant notifications remain areas for improvement.
 - This is a hackathon prototype, not approved for unsupervised lending of hazardous or restricted equipment.
 - AI coding assistants, open-source libraries/frameworks, existing assets/templates and each member's exact contributions must be disclosed in the final form. Keep those details accurate to development history.
+
+## Release safeguards
+- GitHub Actions runs lint, unit tests and production build on main pushes and pull requests. This alone does not validate the live Supabase two-account flow.
+- Judge login is still required for private booking actions; do not put account passwords in public source or reports.
