@@ -18,7 +18,10 @@ export async function POST(request: Request) {
   const resource_id = body.resource_id;
   const starts_at = body.starts_at;
   const ends_at = body.ends_at;
-  if (typeof resource_id !== "string" || !/^[0-9a-f-]{36}$/i.test(resource_id) || typeof starts_at !== "string" || typeof ends_at !== "string")
+  const purpose = typeof body.purpose === "string" ? body.purpose.trim() : "";
+  if (purpose.length < 10 || purpose.length > 1000)
+    return NextResponse.json({ error: "Describe the purpose in 10–1000 characters" }, { status: 400 });
+  if (typeof resource_id !== "string" || !/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(resource_id) || typeof starts_at !== "string" || typeof ends_at !== "string")
     return NextResponse.json({ error: "Valid resource_id, starts_at, ends_at required" }, { status: 400 });
   const start = Date.parse(starts_at), end = Date.parse(ends_at);
   if (!Number.isFinite(start) || !Number.isFinite(end) || start < Date.now() || end <= start || end - start > 7 * 86400000)
@@ -26,7 +29,7 @@ export async function POST(request: Request) {
   const { data, error } = await db.from("bookings").insert({
     requester_id: user.id, resource_id,
     starts_at: new Date(start).toISOString(), ends_at: new Date(end).toISOString(),
-    purpose: typeof body.purpose === "string" ? body.purpose.slice(0, 1000) : "",
+    purpose,
   }).select().single();
   return error ? NextResponse.json({ error: error.message }, { status: 400 }) : NextResponse.json(data, { status: 201 });
 }
