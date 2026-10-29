@@ -132,13 +132,16 @@ async function login(page, role) {
     console.log("PASS owner waitlist, approve, reject and add resource");
     await login(page, "student");
     await page.goto(`${origin}/bookings/${id}/handover`);
-    await page
-      .getByRole("img", { name: `QR code for booking ${id}` })
-      .waitFor();
-    await page.getByLabel("Booking / handover code").fill(id);
-    await page
-      .getByLabel("Condition notes")
-      .fill("All equipment and accessories in good condition.");
+    await page.getByRole("img", { name: "Private student handover pass QR code" }).waitFor();
+    await page.getByText("Your handover pass is ready").waitFor();
+    assert.equal(await page.getByRole("button", { name: "Confirm check-out" }).count(), 0,
+      "Student cannot confirm equipment checkout");
+    console.log("PASS student receives QR but cannot confirm checkout");
+
+    await login(page, "owner");
+    await page.goto(`${origin}/bookings/${id}/handover`);
+    await page.getByLabel("Student handover pass").fill(id);
+    await page.getByLabel("Condition notes").fill("Equipment and accessories in good condition.");
     const photo = {
       name: "condition.png",
       mimeType: "image/png",
@@ -152,32 +155,37 @@ async function login(page, role) {
     await page.getByRole("button", { name: "Confirm check-out" }).click();
     await page.getByRole("heading", { name: "Check-out confirmed" }).waitFor();
     await page.goto(`${origin}/bookings/${id}/handover`);
-    await page.getByLabel("Booking / handover code").fill(id);
-    await page
-      .getByLabel("Condition notes")
-      .fill("Returned with case and both batteries. No damage.");
+    await page.getByLabel("Student handover pass").fill(id);
+    await page.getByLabel("Condition notes").fill("Returned with case and all accessories.");
     await page.locator("input[type=file]").setInputFiles(photo);
     await page.getByRole("checkbox").check();
-    await page
-      .getByRole("button", { name: "Confirm return", exact: true })
-      .click();
+    await page.getByRole("button", { name: "Confirm return", exact: true }).click();
     await page.getByRole("heading", { name: "Return confirmed" }).waitFor();
+
+    await login(page, "student");
     await page.goto(`${origin}/bookings/${id}/handover?kind=incident`);
-    await page
-      .getByLabel("What happened?")
-      .fill("Small mark on carry case reported for owner review.");
+    await page.getByLabel("Issue category").selectOption("damage");
+    await page.getByLabel("What happened?").fill("Small mark on carry case. Fictional test incident.");
     await page.getByRole("checkbox").check();
     await page.getByRole("button", { name: "Submit incident report" }).click();
-    await page
-      .getByRole("heading", { name: "Incident report submitted" })
-      .waitFor();
+    await page.getByRole("heading", { name: "Incident report submitted" }).waitFor();
+
+    await login(page, "owner");
+    await page.goto(`${origin}/bookings/${id}`);
+    await page.getByLabel("Owner resolution / next steps").fill("Inspected case: minor cosmetic mark. No repair needed.");
+    await page.getByRole("button", { name: "Record resolution" }).click();
+    await page.getByText("Owner resolution:", { exact: false }).waitFor();
+    await page.getByText("Incident resolved", { exact: true }).waitFor();
+
+    await login(page, "student");
     await page.goto(`${origin}/bookings/${id}`);
     await page.getByRole("heading", { name: "Activity timeline" }).waitFor();
-    assert.equal(await page.locator(".timeline-item").count(), 5);
+    assert.equal(await page.locator(".timeline-item").count(), 7);
     assert.equal(await page.locator(".report-card").count(), 3);
     await page.reload();
     await page.locator(".status.returned").first().waitFor();
     assert.equal(await page.locator(".report-card").count(), 3);
+    console.log("PASS owner-only handover, incident reporting, owner resolution and audit trail");
     assert.deepEqual(errors, [], "No browser runtime errors");
     console.log(
       "PASS QR rendering, photo submission, check-out, return, incident history and refresh persistence",
