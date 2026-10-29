@@ -231,10 +231,10 @@ function HandoverForm({ id, incident }: { id: string; incident: boolean }) {
                   }
                 />
               </label>
-              {<label className="field">
+              {(!incident || isDemo) && <label className="field">
                 {incident
-                  ? "Supporting photos (optional)"
-                  : "Condition photos (required)"}
+                  ? "Supporting photos (demo filenames only)"
+                  : "Condition photo (optional in live mode)"}
                 <input
                   type="file"
                   accept="image/*"
