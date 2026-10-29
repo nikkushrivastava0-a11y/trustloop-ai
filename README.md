@@ -70,7 +70,7 @@ The resource matcher scores keyword overlap between titles, categories and descr
 - Live UI refreshes booking lists and history on window focus and approximately every 12 seconds; this is polling, not realtime push.
 - Owner/institution provisioning and training verification are still limited.
 - In-app approval/reminder notifications and automated overdue messaging are not complete (overdue labels exist).
-- Incident creation exists but full incident resolution/dispute workflow remains incomplete.
+- Owners can record audited incident resolutions; multi-party disputes, appeals and escalation workflows remain incomplete.
 - Need further concurrent booking, access-control and browser E2E testing before production use.
 - Availability must be verified by owner approval; displayed slots may omit other students' private bookings.
 - Never enter confidential personal data into demo accounts.
