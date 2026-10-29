@@ -130,10 +130,16 @@ export const realApi = {
     ];
     return { events, reports };
   },
+  async handoverPass(id: string): Promise<string> {
+    const db = client();
+    const { data, error } = await db.rpc("get_handover_pass", { p_booking_id: id });
+    if (error) throw new Error(error.message);
+    return String(data);
+  },
   async report(id: string, kind: ConditionReport["kind"], notes: string, photos: File[], code?: string): Promise<ConditionReport> {
     if (photos.length) throw new Error("Photo uploads are not yet supported in live mode. Remove files and record detailed condition notes.");
-    if (kind !== "incident" && code !== id)
-      throw new Error("Enter the booking ID shown beside the QR code.");
+    if (kind !== "incident" && !code)
+      throw new Error("Enter the student handover pass shown by the requester.");
     const now = new Date().toISOString();
     if (kind === "incident") {
       const result = await request<{id:string;created_at:string}>("/bookings/incident", {
@@ -141,7 +147,7 @@ export const realApi = {
       });
       return {id:result.id,booking_id:id,kind,notes,photo_names:[],created_at:result.created_at};
     }
-    await request("/bookings/handover", {method:"POST",body:JSON.stringify({booking_id:id,stage:kind,notes})});
+    await request("/bookings/handover", {method:"POST",body:JSON.stringify({booking_id:id,stage:kind,notes,passcode:code})});
     return {id:crypto.randomUUID(),booking_id:id,kind,notes,photo_names:[],created_at:now};
   }
 };
