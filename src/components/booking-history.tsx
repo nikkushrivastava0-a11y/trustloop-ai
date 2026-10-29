@@ -31,25 +31,35 @@ function History({ id }: { id: string }) {
   const [error, setError] = useState("");
   useEffect(() => {
     let active = true;
-    Promise.all([api.bookings(), api.resources(), api.history(id)])
-      .then(([b, r, h]) => {
-        if (active) {
-          const current = b.find((item) => item.id === id);
-          setBooking(current);
-          setResource(r.find((item) => item.id === current?.resource_id));
-          setEvents(h.events);
-          setReports(h.reports);
-          setLoading(false);
-        }
-      })
-      .catch((e) => {
-        if (active) {
-          setError(e.message);
-          setLoading(false);
-        }
-      });
+    let fetching = false;
+    async function refresh() {
+      if (!active || fetching || document.hidden) return;
+      fetching = true;
+      try {
+        const [b, r, h] = await Promise.all([api.bookings(), api.resources(), api.history(id)]);
+        if (!active) return;
+        const current = b.find((item) => item.id === id);
+        setBooking(current);
+        setResource(r.find((item) => item.id === current?.resource_id));
+        setEvents(h.events);
+        setReports(h.reports);
+        setError("");
+      } catch (e) {
+        if (active) setError((e as Error).message);
+      } finally {
+        fetching = false;
+        if (active) setLoading(false);
+      }
+    }
+    void refresh();
+    const timer = window.setInterval(() => void refresh(), 12000);
+    document.addEventListener("visibilitychange", refresh);
+    window.addEventListener("focus", refresh);
     return () => {
       active = false;
+      window.clearInterval(timer);
+      document.removeEventListener("visibilitychange", refresh);
+      window.removeEventListener("focus", refresh);
     };
   }, [id]);
   return (
