@@ -44,7 +44,9 @@ export async function POST(request: Request) {
   const allowed = new Set(inventory.map(item => item.id));
   if (!inventory.length) return NextResponse.json({ suggestions: [], source: "llm" });
 
-  const bearer = process.env.AI_GATEWAY_API_KEY || process.env.VERCEL_OIDC_TOKEN;
+  // In Vercel Functions, OIDC may arrive as an inbound header rather than process.env.
+  // Never forward this header to browsers or include it in logs.
+  const bearer = process.env.AI_GATEWAY_API_KEY || process.env.VERCEL_OIDC_TOKEN || request.headers.get("x-vercel-oidc-token");
   if (!bearer) return NextResponse.json({ error: "AI Gateway authentication is not configured (missing token)." }, { status: 503 });
 
   const controller = new AbortController();
