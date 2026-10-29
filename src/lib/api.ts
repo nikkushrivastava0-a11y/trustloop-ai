@@ -147,6 +147,16 @@ export const api = {
     save(d);
     return r;
   },
+  async resolveIncident(id: string, resolution: string): Promise<void> {
+    if (base) return realApi.resolveIncident(id, resolution);
+    const d=read();
+    if (d.user?.role!=="owner") throw new Error("Owner access required");
+    const incident=d.reports.find(r=>r.id===id && r.kind==="incident");
+    if (!incident || incident.resolution) throw new Error("Incident not found or already resolved");
+    incident.resolution=resolution;
+    d.events.push({id:crypto.randomUUID(),booking_id:incident.booking_id,status:"requested",action:"incident_resolved",at:new Date().toISOString(),note:"Incident resolved: "+resolution});
+    save(d);
+  },
   async history(
     id: string,
   ): Promise<{ events: BookingEvent[]; reports: ConditionReport[] }> {
